@@ -18,3 +18,15 @@ https://github.com/BladEvgen/Home_Works
 Английский язык на уровне свободного чтения технической документации.
 Опыт использования RabbitMQ, Apache Kafka и других очередей и брокеров является плюсом
 
+Requirements
+
+Strong proficiency in Rust programming language.
+Experience with Solana blockchain development.
+Familiarity with blockchain concepts and protocols, such as consensus algorithms and smart contracts.
+Solid understanding of options and financial products.
+Strong mathematical skills.
+Excellent problem-solving skills.
+Familiarity with version control tools such as Git.
+Ability to work independently as well as in a team environment.
+Strong written and verbal communication skills.
+Experience in FinTech is a big plus.
