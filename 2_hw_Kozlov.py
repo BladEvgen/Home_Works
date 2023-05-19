@@ -12,10 +12,10 @@ else:
 #задание 2
 chet = int(input('Введите целое число '))
 
-if chet%2 ==0:
-	print('true')
+if chet % 2 == 0:
+	print('True')
 else:
-	print('false')
+	print('False')
 
 
 #задание 3
