@@ -8,7 +8,7 @@ def find_missing_card():
     return sum
 
 
-# print(f"Номер потерянной карты: {find_missing_card()}")
+print(f"Номер потерянной карты: {find_missing_card()}")
 
 
 def squares_of_natural():
@@ -19,5 +19,6 @@ def squares_of_natural():
         squares.append(i * i)
         i += 1
     return squares
+
 
 print(f"Output: {squares_of_natural()}")
