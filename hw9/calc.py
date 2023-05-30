@@ -39,17 +39,21 @@ def main():
         b = float(input("Enter b: "))
     match action:
         case "*":
+            print("a digit multiplied by b digit")
             print(multiplay(a, b))
         case "/":
+            print("a digit divide by b digit")
             print(divide(a, b))
         case "+":
             print(plus(a, b))
         case "-":
             print(minus(a, b))
         case "power":
+            print("a digit raised to b digit")
             print(pow(a, b))
         case _:
             print("Invalid action")
 
 
-main()
+if __name__ == "__main__":
+    main()
