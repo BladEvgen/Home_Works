@@ -1,5 +1,5 @@
-def search_target(array: list[int | float], target: int | float) -> bool:
-    if not array or target is None:
+def search_target(array: list[float], target: float) -> bool:
+    if not array:
         return False
 
     if array[0] == target:
@@ -15,9 +15,10 @@ target = None
 
 while target is None:
     target_input = input("Введите число для поиска: ")
-    if not target_input.isdigit():
-        print("Неверный формат ввода. Пожалуйста, введите число.")
-    else:
+    try:
         target = float(target_input)
+    except:
+        print("Неверный формат ввода. Пожалуйста, введите число.")
+
 
 print(search_target(nums, target))
