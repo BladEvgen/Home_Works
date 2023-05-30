@@ -5,7 +5,7 @@ def multiplay(a: int | float, b: int | float) -> int | float:
     return a * b
 
 
-def divide(a: int | float, b: int | float) -> int | float:
+def divide(a: int | float, b: int | float) -> float | None:
     if b != 0:
         return a / b
     else:
