@@ -1,7 +1,7 @@
 from math import sqrt, pow
 
 
-def multiplay(a: int | float, b: int | float) -> int | float:
+def multiply(a: int | float, b: int | float) -> int | float:
     return a * b
 
 
@@ -40,7 +40,7 @@ def main():
     match action:
         case "*":
             print("a digit multiplied by b digit")
-            print(multiplay(a, b))
+            print(multiply(a, b))
         case "/":
             print("a digit divide by b digit")
             print(divide(a, b))
