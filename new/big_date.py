@@ -20,9 +20,7 @@ def calculate_time_left(dt1, dt2):
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
-    time_left = (
-        f"{days} дней(-день), {hours} час(-ов), {minutes} минут(-а/-ы), {seconds} секунд(-а/-ы)"
-    )
+    time_left = f"{days} дней(-день), {hours} час(-ов), {minutes} минут(-а/-ы), {seconds} секунд(-а/-ы)"
     return time_left
 
 
@@ -34,6 +32,7 @@ def save_dates_to_json(result):
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(result, file, ensure_ascii=False)
     print("Даты сохранены в ", file_path)
+
 
 def main():
     date1 = get_valid_datetime("Введите первую дату и время (dd.mm.yyyy HH:MM:SS): ")
@@ -53,6 +52,7 @@ def main():
     save_dates_to_json(result)
 
     print("Время, оставшееся до большей даты:", time_left)
+
 
 if __name__ == "__main__":
     main()
