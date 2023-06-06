@@ -126,6 +126,7 @@ def manufacturer_replace(manufacturer, old_manufacturer, new_manufacturer):
 
 
 def main():
+    print("\n\n======================\n\n")
     print(superset({1, 5, 3, 6}, {3, 7}))
     print(superset({1, 5, 3, 6}, {6, 3, 1, 5}))
 
@@ -178,8 +179,8 @@ def main():
     print(
         f"Обновленный кортеж производителей автомобилей: {manufacturer_replace(manufacturer = manufacturers, old_manufacturer = input('Введите название производителя для замены: '), new_manufacturer = input('Ввдетие слово для замены: '))}"
     )
-    # print("\n\n=========СЛОВАРЬ=========\n\n")
-    # eng_french()
+    print("\n\n=========СЛОВАРЬ=========\n\n")
+    eng_french()
 
 
 if __name__ == "__main__":
