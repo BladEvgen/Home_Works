@@ -86,7 +86,7 @@ def eng_french():
                 print("Пожалуйста, выберите действие из списка.")
 
 
-def caesar_cipher(text: str, shift: int = 0) -> str:
+def caesar_cipher(text: str, shift: int) -> str:
     encrypted_text = ""
     for char in text:
         if char == " ":
@@ -113,6 +113,18 @@ def count_fruits_2(fruit: str, fruit_tuple: tuple[str]) -> int:
     return count
 
 
+def manufacturer_replace(manufacturer, old_manufacturer, new_manufacturer):
+    try:
+        manufacturer = list(manufacturer)
+        for i in range(len(manufacturer)):
+            if manufacturer[i] == old_manufacturer:
+                manufacturer[i] = new_manufacturer
+        return tuple(manufacturer)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        return manufacturer
+
+
 def main():
     print(superset({1, 5, 3, 6}, {3, 7}))
     print(superset({1, 5, 3, 6}, {6, 3, 1, 5}))
@@ -122,7 +134,7 @@ def main():
 
     print("\n\n=========Шифр Цезаря=========\n\n")
     print(
-        f'Шифр Цезаря: {caesar_cipher(text=input("Введите желаемый текст для шифрования (на английском): ").lower(), shift=int(input("Введите сдвиг для шифровки: ")))}'
+        f'Шифр Цезаря: {caesar_cipher(text = input("Введите желаемый текст для шифрования (на английском): ").lower(), shift = int(input("Введите сдвиг для шифровки: ")))}'
     )
 
     print("\n\n=========Фрукт в кортеже v1=========\n\n")
@@ -143,11 +155,15 @@ def main():
         )
     except Exception as e:
         print(f"Произошла ошибка: {e}")
-        
+
     print("\n\n=========Фрукт в кортеже v2=========\n\n")
     try:
         fruit_tuple = (
-            "banana", "apple", "bananamango", "mango", "strawberry-banana"
+            "banana",
+            "apple",
+            "bananamango",
+            "mango",
+            "strawberry-banana",
         )  # banana 3
         fruit = input("Введите название фрукта: ")
         print(
@@ -155,6 +171,13 @@ def main():
         )
     except Exception as e:
         print(f"Произошла ошибка: {e}")
+
+    print("\n\n=========Производитель машин=========\n\n")
+    manufacturers = ("BMW", "Mercedes", "Audi", "BMW", "Toyota", "Honda", "KIA", "BMW")
+    print(f"Старый кортеж производителей: {manufacturers}")
+    print(
+        f"Обновленный кортеж производителей автомобилей: {manufacturer_replace(manufacturer = manufacturers, old_manufacturer = input('Введите название производителя для замены: '), new_manufacturer = input('Ввдетие слово для замены: '))}"
+    )
     # print("\n\n=========СЛОВАРЬ=========\n\n")
     # eng_french()
 
