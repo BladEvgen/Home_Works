@@ -28,6 +28,7 @@ def add_word(dictionary):
     except Exception as e:
         print("Произошла ошибка при добавлении слова:", str(e))
 
+
 def remove_word(dictionary):
     try:
         eng_word = input("Введите английское слово для удаления: ")
@@ -38,6 +39,7 @@ def remove_word(dictionary):
     except Exception as e:
         print("Произошла ошибка при удалении слова:", str(e))
 
+
 def search_word(dictionary):
     try:
         eng_word = input("Введите английское слово для поиска: ")
@@ -47,6 +49,7 @@ def search_word(dictionary):
             print("Слово не найдено в словаре.")
     except Exception as e:
         print("Произошла ошибка при поиске слова:", str(e))
+
 
 def replace_word(dictionary):
     try:
@@ -64,7 +67,9 @@ def replace_word(dictionary):
 def eng_french():
     dictionary = {}
     while True:
-        print("\nМеню:\n1. Добавить слово\n2. Удалить слово\n3. Найти слово\n4. Заменить слово\n5. Выйти")
+        print(
+            "\nМеню:\n1. Добавить слово\n2. Удалить слово\n3. Найти слово\n4. Заменить слово\n5. Выйти"
+        )
         choice = input("Выберите действие (1-5): ")
         match choice:
             case "1":
@@ -81,6 +86,33 @@ def eng_french():
                 print("Пожалуйста, выберите действие из списка.")
 
 
+def caesar_cipher(text: str, shift: int = 0) -> str:
+    encrypted_text = ""
+    for char in text:
+        if char == " ":
+            encrypted_text += " "
+        else:
+            encrypted_char = chr((ord(char) - ord("a") + shift) % 26 + ord("a"))
+            encrypted_text += encrypted_char
+    return encrypted_text
+
+
+def count_fruits_1(fruit: str, fruit_tuple: tuple[str]) -> int:
+    count = 0
+    for item in fruit_tuple:
+        if item == fruit:
+            count += 1
+    return count
+
+
+def count_fruits_2(fruit: str, fruit_tuple: tuple[str]) -> int:
+    count = 0
+    for item in fruit_tuple:
+        if fruit in item:
+            count += 1
+    return count
+
+
 def main():
     print(superset({1, 5, 3, 6}, {3, 7}))
     print(superset({1, 5, 3, 6}, {6, 3, 1, 5}))
@@ -88,8 +120,44 @@ def main():
     print(set_gen([4, 4, 1, 2, 4]))
     print(set_gen([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
 
-    print("\n\n=========СЛОВАРЬ=========\n\n")
-    eng_french()
+    print("\n\n=========Шифр Цезаря=========\n\n")
+    print(
+        f'Шифр Цезаря: {caesar_cipher(text=input("Введите желаемый текст для шифрования (на английском): ").lower(), shift=int(input("Введите сдвиг для шифровки: ")))}'
+    )
+
+    print("\n\n=========Фрукт в кортеже v1=========\n\n")
+    try:
+        fruit_tuple = (
+            "apple",
+            "orange",
+            "banana",
+            "pineapple",
+            "banana",
+            "apple",
+            "banana",
+            "banana",
+        )  # banana 4
+        fruit = input("Введите название фрукта: ")
+        print(
+            f"Количество {fruit} в кортеже {fruit_tuple}: {count_fruits_1(fruit, fruit_tuple)} раз (-а)"
+        )
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        
+    print("\n\n=========Фрукт в кортеже v2=========\n\n")
+    try:
+        fruit_tuple = (
+            "banana", "apple", "bananamango", "mango", "strawberry-banana"
+        )  # banana 3
+        fruit = input("Введите название фрукта: ")
+        print(
+            f"Количество {fruit} в кортеже {fruit_tuple}: {count_fruits_2(fruit, fruit_tuple)} раз (-а)"
+        )
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+    # print("\n\n=========СЛОВАРЬ=========\n\n")
+    # eng_french()
+
 
 if __name__ == "__main__":
     main()
