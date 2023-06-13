@@ -18,23 +18,28 @@ def multiple_delimiters(text: str) -> list[str]:
     return re.split(";|,|\?|\!|\n|\.", text)
 
 
-def elections(votes: list[str]):
-    candidates = {
-        "Аскаров": 0,
-        "Бекмуханов": 0,
-        "Ернур": 0,
-        "Пешая": 0,
-        "Карим": 0,
-        "Шаримазданов": 0,
-    }
-    for vote in votes:
-        if vote in candidates:
-            candidates[vote] += 1
-    max_votes = max(candidates.values())
-    
-    winners = [candidate  for candidate , vote in candidates.items() if votes == max_votes]
-    
-    return winners
+def elections(candidate_list: list[str]):
+    vote_counts = {}
+    for candidate in candidate_list:
+        if candidate in vote_counts:
+            vote_counts[candidate] += 1
+        else:
+            vote_counts[candidate] = 1
+    max_votes = max(vote_counts.values())
+    winners = [
+        candidate for candidate, votes in vote_counts.items() if votes == max_votes
+    ]
+    if len(winners) == 1:
+        winner = winners[0]
+        num_votes = max_votes
+    else:
+        # Multiple winners, sort by the length of their names and choose the winner with the minimum number of letters
+        sorted_winners = sorted(winners, key=len)
+        winner = sorted_winners[0]
+        num_votes = max_votes
+
+    return winner, num_votes
+
 
 def main():
     print("\n\n=========Домены с почт=========\n\n")
@@ -48,8 +53,17 @@ def main():
     print(f'{start_from_vowel_letter(input("введите текст на английском языке: "))}')
     print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n")
     print(multiple_delimiters("Hello, world! How are you? I am fine."))
-    votes = ['Ернур']
-    winner = elections(votes=votes)
-    print(winner)
+
+    candidates = [
+        "Askarov",
+        "Bekmukhanov",
+        "Yernur",
+        "Peshaya",
+        "Karim",
+        "Sharimazdanov",
+    ]
+    voter_choice = "Yernur"
+
+
 if __name__ == "__main__":
     main()
