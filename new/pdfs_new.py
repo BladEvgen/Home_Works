@@ -33,13 +33,11 @@ def elections(candidate_list: list[str]):
         winner = winners[0]
         num_votes = max_votes
     else:
-        # Multiple winners, sort by the length of their names and choose the winner with the minimum number of letters
-        sorted_winners = sorted(winners, key=len)
+        sorted_winners = sorted(winners, key=lambda x: (len(x), x))
         winner = sorted_winners[0]
         num_votes = max_votes
 
     return winner, num_votes
-
 
 def main():
     print("\n\n=========Домены с почт=========\n\n")
@@ -53,16 +51,12 @@ def main():
     print(f'{start_from_vowel_letter(input("введите текст на английском языке: "))}')
     print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n")
     print(multiple_delimiters("Hello, world! How are you? I am fine."))
+    print("\n\n=========Выборы=========\n\n")
+    candidate_list = ["Аскаров", "Бекмуханов", "Ернур", "Пешая", "Карим", "Шаримазданов", "Ернур", "Ян", "Ян"]
+    winner, num_votes = elections(candidate_list)
+    print("Победитель выборов:", winner)
+    print("Количество голосов победителя:", num_votes)
 
-    candidates = [
-        "Askarov",
-        "Bekmukhanov",
-        "Yernur",
-        "Peshaya",
-        "Karim",
-        "Sharimazdanov",
-    ]
-    voter_choice = "Yernur"
 
 
 if __name__ == "__main__":
