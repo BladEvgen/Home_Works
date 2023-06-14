@@ -50,7 +50,7 @@ def main():
     print(f"Лист доменов: {domain_from_email(email_list)}")
     print("\n\n=========Слова с гласной буквы=========\n\n")
     print(f'{start_from_vowel_letter(input("введите текст на английском языке: "))}')
-    print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n")
+    print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n") # "Apple is a fruit. Elephant is an animal."
     print(multiple_delimiters("Hello, world! How are you? I am fine."))
     print("\n\n=========Выборы=========\n\n")
     candidate_list = [
