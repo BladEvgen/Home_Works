@@ -52,7 +52,7 @@ def main():
     print(f'{start_from_vowel_letter(input("введите текст на английском языке: "))}') # "Apple is a fruit. Elephant is an animal."
     print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n") 
     print(multiple_delimiters("Hello, world! How are you? I am fine."))
-    print("\n\n=========Выборы=========\n\n")
+    print("\n\n=========Выборы=========")
     candidate_list = [
         "Аскаров",
         "Бекмуханов",
