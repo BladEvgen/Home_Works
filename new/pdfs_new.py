@@ -39,6 +39,7 @@ def elections(candidate_list: list[str]):
 
     return winner, num_votes
 
+
 def main():
     print("\n\n=========Домены с почт=========\n\n")
     email_list = [
@@ -52,11 +53,20 @@ def main():
     print("\n\n=========Разбитие строки по нескольким разделителям=========\n\n")
     print(multiple_delimiters("Hello, world! How are you? I am fine."))
     print("\n\n=========Выборы=========\n\n")
-    candidate_list = ["Аскаров", "Бекмуханов", "Ернур", "Пешая", "Карим", "Шаримазданов", "Ернур", "Ян", "Ян"]
+    candidate_list = [
+        "Аскаров",
+        "Бекмуханов",
+        "Ернур",
+        "Пешая",
+        "Карим",
+        "Шаримазданов",
+        "Ернур",
+        "Ян",
+        "Ян",
+    ]
     winner, num_votes = elections(candidate_list)
     print("Победитель выборов:", winner)
     print("Количество голосов победителя:", num_votes)
-
 
 
 if __name__ == "__main__":
