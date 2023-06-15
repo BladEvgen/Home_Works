@@ -24,7 +24,7 @@ def password_check(password: str) -> bool:
 
 def save_credentials():
     email = entry_email.get()
-    password = entry_password.get()
+    password = entry_password.get() #qwertyQWERTY123!@ <-- valid password
 
     if email_check(email) and password_check(password):
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
