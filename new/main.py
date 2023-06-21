@@ -7,6 +7,8 @@ import asyncio
 import aiohttp
 import time
 
+
+# TODO: все же есть проблема небольшая, интерфес подвисает во время скачивания, думал проблема во wrapper и вывел в Gui но ничего не поменялось
 url = "https://picsum.photos/320/240/"
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (HTML, like Gecko) "
