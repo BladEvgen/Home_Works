@@ -22,7 +22,9 @@ def execution_time(function):
         start_time = time.perf_counter()
         result = function(*args, **kwargs)
         execution_time = time.perf_counter() - start_time
-        print(f"Execution time: {execution_time:.7f} seconds")
+        time_label[
+            "text"
+        ] = f"Execution time: {execution_time:.7f} seconds"  # узнал у нейросети как вывести wrapper в GUI
         return result
 
     return wrapper
@@ -74,6 +76,7 @@ async def download_image(session, index):
                 f.write(chunk)
 
 
+# данную функцию я написал отдельным файлом и проверил, также была все таки не большая проблема в области видемости if name == main исправил все (планировал добавить его чуть позже когда все будет работать)
 def download_image_multiprocess(index):
     response = requests.get(url=url, headers=headers)
     filename = f"image_multiprocess_{index}.jpg"
@@ -82,6 +85,8 @@ def download_image_multiprocess(index):
         file.write(response.content)
 
 
+# этим способом я пользовался и примерно понимал как он работате поэтому решил использовать его, тк с изначальным вариантом с process = multiprocessing.Process(target=sync_download_one_image, args=(), kwargs={}) он создавал 10 копий окон
+# потом по нажатию скачивания мог скачать все 10 файлов
 @execution_time
 def download_images_multiprocess():
     with Pool(processes=10) as pool:
@@ -91,6 +96,9 @@ def download_images_multiprocess():
 if __name__ == "__main__":
     root = tk.Tk()
     root.geometry("500x250")
+
+    time_label = tk.Label(root, text="Execution time: ", font=("Arial Bold", 14))
+    time_label.pack()
 
     sync_button = tk.Button(
         root,
