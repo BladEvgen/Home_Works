@@ -7,13 +7,14 @@ import os
 url = "https://picsum.photos/320/240/"
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (HTML, like Gecko) '
-                  'Chrome/102.0.0.0 Safari/537.36'
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (HTML, like Gecko) "
+    "Chrome/102.0.0.0 Safari/537.36"
 }
 
 local_path = os.path.join(os.path.dirname(__file__), "temp")
 
 os.makedirs(local_path, exist_ok=True)
+
 
 def execution_time(function):
     def wrapper(*args, **kwargs):
@@ -21,7 +22,9 @@ def execution_time(function):
         result = function(*args, **kwargs)
         print(f"Execution time: {time.perf_counter() - start_time} ")
         return result
+
     return wrapper
+
 
 @execution_time
 def sync_download_images():
@@ -29,6 +32,7 @@ def sync_download_images():
         response = requests.get(url, headers=headers)
         with open(os.path.join(local_path, f"image_sync_{i}.jpg"), "wb") as f:
             f.write(response.content)
+
 
 @execution_time
 def threaded_download_images():
@@ -46,13 +50,16 @@ def threaded_download_images():
     for thread in threads:
         thread.join()
 
+
 root = tk.Tk()
-root.geometry("500x200") 
+root.geometry("500x200")
 
 sync_button = tk.Button(root, text="Sync Download", command=sync_download_images)
 sync_button.pack()
 
-threaded_button = tk.Button(root, text="Threaded Download", command=threaded_download_images)
+threaded_button = tk.Button(
+    root, text="Threaded Download", command=threaded_download_images
+)
 threaded_button.pack()
 
 root.mainloop()
