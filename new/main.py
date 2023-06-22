@@ -91,7 +91,7 @@ def download_image_multiprocess(index):
 # потом по нажатию скачивания мог скачать все 10 файлов
 @execution_time
 def download_images_multiprocess():
-    with Pool(processes=10) as pool:
+    with Pool(processes=20) as pool:
         pool.map(download_image_multiprocess, range(10))
 
 
