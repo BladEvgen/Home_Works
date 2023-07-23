@@ -19,8 +19,11 @@
               </h3>
               <div class="mb-1 text-muted text-center">{{ date }}</div>
               <p class="mb-auto">{{ service[4][:57] }}</p>
-              <a href="{{ url_for('service_details', service_id=service[0]) }}" class="stretched-link">Более подробно</a>
-
+              <a
+                href="{{ url_for('service_details', service_id=service[0]) }}"
+                class="stretched-link"
+                >Более подробно</a
+              >
             </div>
             <div class="col-auto d-none d-lg-block">
               <img
