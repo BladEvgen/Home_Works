@@ -100,41 +100,28 @@ class DatabaseTools:
     ):
         query_str = """
         INSERT INTO services (title, price_low, price_high, description, image)
-        VALUES (:title, :price_low, :price_high, :description, :image)
+        VALUES (?, ?, ?, ?, ?)
         """
-
-        service_data = {
-            "title": title,
-            "price_low": price_low,
-            "price_high": price_high,
-            "description": description,
-            "image": image,
-        }
-
+    
+        service_data = (title, price_low, price_high, description, image)
+    
         Database.query(query_str, service_data)
 
     @staticmethod
     def update_service_by_id(
-        service_id: int,
-        title: str,
-        price_low: int | float,
-        price_high: int | float,
-        description: str,
-        image=None,
-    ):
+            service_id: int,
+            title: str,
+            price_low: int | float,
+            price_high: int | float,
+            description: str,
+            image=None,
+        ):
         query_str = """
         UPDATE services
-        SET title = :title, price_low = :price_low, price_high = :price_high, description = :description, image = :image
-        WHERE id = :service_id
+        SET title = ?, price_low = ?, price_high = ?, description = ?, image = ?
+        WHERE id = ?
         """
-        service_data = {
-            "service_id": service_id,
-            "title": title,
-            "price_low": price_low,
-            "price_high": price_high,
-            "description": description,
-            "image": image,
-        }
+        service_data = (title, price_low, price_high, description, image, service_id)
 
         Database.query(query_str, service_data)
 
