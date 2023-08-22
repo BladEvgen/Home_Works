@@ -7,7 +7,7 @@ def is_valid(question: str, pattern: str) -> str:
 
     Args:
         question (str): Ask question and check by pattern
-        pattern (str): give pattern to match 
+        pattern (str): give pattern to match
 
     Returns:
         str: return checked by pattern argument
