@@ -60,7 +60,7 @@ def select_data(user_id):
 def main():
     user_id = insert_data("doe_john", "johndoe@example.com")
     if user_id:
-        print(f"User inserted")
+        print("User inserted")
 
     user = select_data(user_id)
     if user:
