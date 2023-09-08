@@ -17,7 +17,9 @@ class Ui(QWidget):
         self.ui.pushButton_save_candidate.clicked.connect(
             self.save_candidate_to_database
         )
-        self.ui.pushButton_export_candidates.clicked.connect(self.export_candidates_to_excel)
+        self.ui.pushButton_export_candidates.clicked.connect(
+            self.export_candidates_to_excel
+        )
         self.setMinimumSize(400, 400)
         self.show()
 
@@ -145,9 +147,6 @@ class Ui(QWidget):
         cursor.execute(query)
         rows = cursor.fetchall()
         return rows
-
-
-
 
 
 def database_postgre():
