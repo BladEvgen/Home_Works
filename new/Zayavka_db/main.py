@@ -4,14 +4,38 @@ import datetime
 import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox, QGridLayout, QPushButton
+from PyQt6.QtWidgets import (
+    QMessageBox,
+    QGridLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QMainWindow,
+    QApplication,
+    QPushButton,
+    QLineEdit,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from PyQt6 import uic
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.header import Header
+import smtplib
+import os
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 
-class Ui(QWidget):
+class Ui(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = uic.loadUi("main.ui", self)
+        self.ui = uic.loadUi("main.ui")
+        self.setCentralWidget(self.ui)
+
         self.ui.pushButton_save.clicked.connect(self.save_to_database)
         self.ui.pushButton_export.clicked.connect(self.export_from_database)
         self.ui.pushButton_save_candidate.clicked.connect(
@@ -20,8 +44,20 @@ class Ui(QWidget):
         self.ui.pushButton_export_candidates.clicked.connect(
             self.export_candidates_to_excel
         )
-        self.setMinimumSize(400, 400)
+        self.ui.pushButton_send_email.clicked.connect(self.send_email)
+
+        self.setMinimumSize(400, 500)
+        self.setMaximumSize(400,500)
         self.show()
+
+        self.lineEdit_email = self.ui.findChild(QLineEdit, "lineEdit_email")
+        self.textEdit_email_message = self.ui.findChild(
+            QTextEdit, "textEdit_email_message"
+        )
+        self.lineEdit_number = self.ui.findChild(QLineEdit, "lineEdit_number")
+        self.lineEdit_candidate_name = self.ui.findChild(
+            QLineEdit, "lineEdit_candidate_name"
+        )
 
     def save_to_database(self):
         try:
@@ -33,7 +69,7 @@ class Ui(QWidget):
                 )
                 return
 
-            price = self.doubleSpinBox_price.value()
+            price = self.ui.doubleSpinBox_price.value()
             connection = sqlite3.connect("database_items.db")
             cursor = connection.cursor()
             query = """
@@ -79,9 +115,6 @@ class Ui(QWidget):
             return False
         return True
 
-    def validate_price(self):
-        pass
-
     def get_all_items(self):
         connection = sqlite3.connect("database_items.db")
         cursor = connection.cursor()
@@ -95,7 +128,7 @@ class Ui(QWidget):
     def save_candidate_to_database(self):
         try:
             name = self.lineEdit_candidate_name.text().strip()
-            role = self.lineEdit_candidate_role.text().strip()
+            role = self.ui.lineEdit_candidate_role.text().strip()
 
             if not name or not role:
                 QMessageBox.critical(self, "Ошибка", "Заполните все поля для кандидата")
@@ -148,16 +181,46 @@ class Ui(QWidget):
         rows = cursor.fetchall()
         return rows
 
-
-def database_postgre():
-    """
-    CREATE TABLE items (
-    id SERIAL PRIMARY KEY,
-    number BIGINT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL default = '0.0'
-    );
-    """
-
+    def send_email(self):
+        recipients_email = self.ui.lineEdit_email.text().split(",")
+        candidates_data = self.get_all_candidates()
+        email_message = self.ui.textEdit_email_message.toPlainText()
+    
+        try:
+            login = os.getenv("login")
+            password = os.getenv("password")
+            msg = MIMEMultipart()
+            msg["Subject"] = Header("Важно к прочтении", "utf-8")
+            msg["From"] = login
+            msg["To"] = ", ".join(recipients_email)
+    
+            # Создаем HTML-таблицу на основе данных о кандидатах
+            html_table = "<table border='1'><tr><th>ID</th><th>Имя кандидата</th><th>Роль кандидата</th></tr>"
+            for row in candidates_data:
+                html_table += (
+                    f"<tr><td>{row[0]}</td><td>{row[1]}</td><td>{row[2]}</td></tr>"
+                )
+            html_table += "</table>"
+    
+            # Добавляем HTML-таблицу и текст сообщения к сообщению
+            msg.attach(MIMEText(html_table, "html", "utf-8"))
+            msg.attach(MIMEText(email_message, "plain", "utf-8"))
+    
+            # Отправляем письмо
+            s = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+            try:
+                s.starttls()
+                s.login(login, password)
+                s.sendmail(msg["From"], recipients_email, msg.as_string())
+            except Exception as ex:
+                print(ex)
+            finally:
+                s.quit()
+    
+            QMessageBox.information(self, "Успешно", "Данные успешно отправлены")
+        except Exception as error:
+            print(error)
+    
 
 def database_sqlite():
     connection = sqlite3.connect("database_items.db")
@@ -183,17 +246,6 @@ def database_sqlite():
     cursor.execute(query_candidates)
 
     connection.commit()
-
-
-class Modal(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.resize(400, 400)
-        self.setWindowTitle("Вы ввели неверный номер заявки")
-        self.grid = QGridLayout(self)
-        self.button = QPushButton()
-        self.button.setText("ОК")
-        self.grid.addWidget(self.button)
 
 
 if __name__ == "__main__":
