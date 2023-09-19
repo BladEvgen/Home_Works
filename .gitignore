@@ -164,3 +164,4 @@ cython_debug/
 scripts/
 new/Zayavka_db/.vscode/launch.json
 .vscode/
+*.xlsx
