@@ -47,25 +47,6 @@ class View:
         return render_template("candidates.html", candidates=candidates)
 
 
-class Database:
-    @staticmethod
-    def query(query_str: str, args=(), many=True) -> list | None:
-        local_path = os.path.join(os.path.dirname(__file__), "db")
-        os.makedirs(local_path, exist_ok=True)
-        with sqlite3.connect(f"{local_path}/database.db") as connection:
-            cursor = connection.cursor()
-            cursor.execute(query_str, args)
-            try:
-                if many:
-                    return cursor.fetchall()
-                return cursor.fetchone()
-            except sqlite3.Error as error:
-                print(f"Error with sqlite3 connection {error}")
-                return None
-            except Exception as error:
-                print(f"Oop something went wrong {error}")
-                return None
-
 
 class Database:
     @staticmethod
