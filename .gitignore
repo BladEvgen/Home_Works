@@ -167,3 +167,4 @@ new/Zayavka_db/.vscode/launch.json
 *.xlsx
 new/flask/templates/old/
 new/flask/static/old/
+*.db
