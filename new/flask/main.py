@@ -26,15 +26,16 @@ class View:
     @app.route("/add_vacancy", methods=["GET", "POST"])
     def add_vacancy():
         if request.method == "POST":
-            title = request.form.get("title")
-            company = request.form.get("company")
-            location = request.form.get("location")
-            description = request.form.get("description")
+            name = str(request.form.get("name"))
+            title = str(request.form.get("title"))
+            location = str(request.form.get("location"))
+            iin = str(request.form.get("iin"))
+            description = str(request.form.get("description"))
             salary = float(request.form.get("salary"))
             date_posted = request.form.get("date_posted")
 
             DatabaseTools.insert_vacancy(
-                title, company, location, description, salary, date_posted
+                name, title, location,iin, description, salary, date_posted
             )
 
             return redirect(url_for("candidates"))
@@ -70,41 +71,56 @@ class DatabaseTools:
                 """
                 CREATE TABLE IF NOT EXISTS vacancies (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    company TEXT,
+                    name TEXT NOT NULL,
+                    title TEXT,
                     location TEXT,
+                    iin INTEGER NOT NULL,
                     description TEXT NOT NULL,
                     salary REAL,
                     date_posted DATE
                 );
                 """
             )
-
+    @staticmethod
+    def convert_iin(iin: str):
+        if isinstance(iin, int):
+            return iin
+        if isinstance(iin, str):
+            try:
+                iin = int(iin)
+            except Exception as e:
+                iin = 0
+                print(str(e))
+            return iin
     @staticmethod
     def insert_vacancy(
+        name: str,
         title: str,
-        company: str,
         location: str,
+        iin: int | str,
         description: str,
         salary: int | float,
         date_posted: str,
     ):
+        iin = DatabaseTools.convert_iin(iin) 
         db_path = DatabaseTools.get_db_path()
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             query_str = """
-                INSERT INTO vacancies (title, company, location, description, salary, date_posted)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO vacancies (name, title, location, iin, description, salary, date_posted)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """
-            vacancy_data = (title, company, location, description, salary, date_posted)
+            vacancy_data = (name, title, location, iin, description, salary, date_posted)
             cursor.execute(query_str, vacancy_data)
+
 
     @staticmethod
     def update_vacancy_by_id(
         vacancy_id: int,
+        name: str,
         title: str,
-        company: str,
         location: str,
+        iin: int,
         description: str,
         salary: int | float,
         date_posted: str,
@@ -114,13 +130,14 @@ class DatabaseTools:
             cursor = connection.cursor()
             query_str = """
                 UPDATE vacancies
-                SET title = ?, company = ?, location = ?, description = ?, salary = ?, date_posted = ?
+                SET name = ?, title = ?, location = ?, iin = ?, description = ?, salary = ?, date_posted = ?
                 WHERE id = ?
             """
             vacancy_data = (
+                name,
                 title,
-                company,
                 location,
+                iin,
                 description,
                 salary,
                 date_posted,
@@ -145,27 +162,37 @@ class DatabaseTools:
                 print(f"Oop something went wrong {str(error)}")
                 return None
             
-def main():
-    DatabaseTools.drop_table()
-    DatabaseTools.create_db()
-    DatabaseTools.insert_vacancy(
-        title="Front-end Developer",
-        company="ABC Company",
-        location="New York",
-        description="We are looking for a skilled Front-end Developer to join our team.",
-        salary=80000.0,
-        date_posted=datetime.datetime.now().strftime("%Y-%m-%d"),
-    )
-    DatabaseTools.insert_vacancy(
-        title="Data Scientist",
-        company="XYZ Corporation",
-        location="San Francisco",
-        description="Join our Data Science team and work on exciting projects.",
-        salary=95000.0,
-        date_posted=datetime.datetime.now().strftime("%Y-%m-%d"),
-    )
+
+DatabaseTools.drop_table()
+DatabaseTools.create_db()
+DatabaseTools.insert_vacancy(
+    name="Leonid",
+    title="Front-end Developer",
+    location="New York",
+    iin = "012345678912",  # str value for checking function to convert to int
+    description="Skilled Front-end Developer.",
+    salary=80000.0,
+    date_posted=datetime.datetime.now().strftime("%Y-%m-%d"),
+)
+DatabaseTools.insert_vacancy(
+    name="Kirill",
+    title="Data Scientist",
+    location="San Francisco",
+    iin = 550033771199,  # int value
+    description="Data Science loves to work on exciting projects.",
+    salary=95000.0,
+    date_posted=datetime.datetime.now().strftime("%Y-%m-%d"),
+)
+DatabaseTools.insert_vacancy(
+    name="Alexander",
+    title="Accountant",
+    location="Detroit",
+    iin = "978060102033",
+    description="Detail-oriented Accountant.",
+    salary=56000.0,
+    date_posted=datetime.datetime.now().strftime("%Y-%m-%d"),
+)
 
 
 if __name__ == "__main__":
-    main()
     app.run(debug=True)
