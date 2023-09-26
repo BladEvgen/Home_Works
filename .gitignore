@@ -168,3 +168,4 @@ new/Zayavka_db/.vscode/launch.json
 new/flask/templates/old/
 new/flask/static/old/
 *.db
+new/flask/db/database.db
