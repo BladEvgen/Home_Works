@@ -224,9 +224,10 @@ class DatabaseTools:
 def uncomment_query():
     """
     Эта функция дропает всю бд и вставляет тестовые данные, можно вытаскивать нужные функции для удобства проверки.
+    Если произошла ошибка по вставлению в бд, то всю логику вытащить за функцию.
     """
-    # DatabaseTools.drop_table()
-    # DatabaseTools.create_db()
+    DatabaseTools.drop_table()
+    DatabaseTools.create_db()
     DatabaseTools.insert_vacancy(
         name="Leonid",
         title="Front-end Developer",
@@ -260,5 +261,4 @@ def uncomment_query():
 
 
 if __name__ == "__main__":
-    # uncomment_query()
     app.run(debug=True)
