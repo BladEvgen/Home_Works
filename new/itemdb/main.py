@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
     QTextEdit,
     QCalendarWidget,
-    QDateEdit
+    QDateEdit,
 )
 from PyQt6 import uic
 
@@ -107,11 +107,15 @@ class Ui(QMainWindow):
         uic.loadUi("main.ui", self)
 
         self.pushButton_save_product.clicked.connect(self.save_product_to_database)
-        self.pushButton_export_production.clicked.connect(self.export_production_records_to_excel)
+        self.pushButton_export_production.clicked.connect(
+            self.export_production_records_to_excel
+        )
 
         self.show()
         self.lineEdit_product_name = self.findChild(QLineEdit, "lineEdit_product_name")
-        self.doubleSpinBox_product_price = self.findChild(QDoubleSpinBox, "doubleSpinBox_product_price")
+        self.doubleSpinBox_product_price = self.findChild(
+            QDoubleSpinBox, "doubleSpinBox_product_price"
+        )
         self.lineEdit_quantity = self.findChild(QLineEdit, "lineEdit_quantity")
         self.dateEdit_date = self.findChild(QDateEdit, "dateEdit_date")
 
@@ -130,7 +134,11 @@ class Ui(QMainWindow):
             product_id = self.get_last_inserted_product_id()
             self.database.insert_production_record(product_id, quantity, date)
 
-            QMessageBox.information(self, "Успешно", "Продукт успешно добавлен и запись о производстве сохранена")
+            QMessageBox.information(
+                self,
+                "Успешно",
+                "Продукт успешно добавлен и запись о производстве сохранена",
+            )
         except Exception as error:
             print(error)
 
