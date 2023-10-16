@@ -90,4 +90,4 @@ def add_task():
     return redirect(url_for("main_page"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
