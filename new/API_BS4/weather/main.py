@@ -1,10 +1,17 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+import os
 import requests
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, session, redirect, url_for
+
 
 app = Flask(__name__)
 app.secret_key = "secret_key_777"
 
-API_KEY_WEATHER = "69daf8597d1202b59ec38eb5cce3f1a0"
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
+
+API_KEY_WEATHER = os.getenv("API_KEY_WEATHER")
 WEATHER_BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 GEO_BASE_URL = "http://api.openweathermap.org/geo/1.0/direct"
 WEATHER_URL = f"{WEATHER_BASE_URL}?appid={API_KEY_WEATHER}&lang=ru"
