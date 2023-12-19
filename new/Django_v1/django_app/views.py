@@ -8,6 +8,7 @@ from django_app import utils
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from pathlib import Path
+from datetime import date
 
 
 PRODUCT_DATABASE: str = "database/database.db"
@@ -15,7 +16,15 @@ MAIN_DB = Path(__file__).resolve().parent.parent / "db.sqlite3"
 
 
 def home(request):
-    return render(request, "home.html", context={})
+    result_data = utils.get_exchange_data()
+    return render(
+        request,
+        "home.html",
+        context={
+            "result_data": result_data,
+            "date": date.today(),
+        },
+    )
 
 
 def about(request):
@@ -53,7 +62,7 @@ def product_list(request):
     #     """,
     #     commit=True,
     # )
-    products = db.query("SELECT * FROM product")
+    products = db.query("SELECT id, name, DESCRIPTION, price FROM product")
     return render(request, "product_list.html", {"products": products})
 
 
