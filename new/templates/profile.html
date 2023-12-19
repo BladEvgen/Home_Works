@@ -4,16 +4,20 @@
 
 {% block main %}
 <div class="container mt-5">
-    <h2>Welcome, {{ user.username }}!</h2>
-    <p>Email: {{ user.email }}</p>
-    {% if user.first_name or user.last_name %}
-        <p>Name: {{ user.first_name }} {{ user.last_name }}</p>
-    {% endif %}
-    <p>Last Login: {{ user.last_login }}</p>
-    <p>Date Joined: {{ user.date_joined }}</p>
-    
-    <h3>Permissions:</h3>
-        <p>Staff status: {% if user.is_staff %}Yes{% else %}No{% endif %}</p>
-        <p>Superuser status: {% if user.is_superuser %}Yes{% else %}No{% endif %}</p>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Welcome, {{ user.username }}!</h2>
+            <p class="card-text">Email: {{ user.email }}</p>
+            {% if user.first_name or user.last_name %}
+                <p class="card-text">Name: {{ user.first_name }} {{ user.last_name }}</p>
+            {% endif %}
+            <p class="card-text">Last Login: {{ user.last_login }}</p>
+            <p class="card-text">Date Joined: {{ user.date_joined }}</p>
+
+            <h3 class="card-title">Permissions:</h3>
+            <p class="card-text">Staff status: {% if user.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+            <p class="card-text">Superuser status: {% if user.is_superuser %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+        </div>
+    </div>
 </div>
 {% endblock main %}

@@ -12,6 +12,7 @@ urlpatterns = [
     path("about", views.about, name="about"),
     path("login", views.login, name="login"),
     path("register", views.register, name="register"),
+    path("logout", views.logout, name="logout"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("product_list", views.product_list, name="product_list"),
 ]
