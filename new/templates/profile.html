@@ -1,0 +1,19 @@
+{% extends "components/base.html" %}
+
+{% block title %}Profile{% endblock title %}
+
+{% block main %}
+<div class="container mt-5">
+    <h2>Welcome, {{ user.username }}!</h2>
+    <p>Email: {{ user.email }}</p>
+    {% if user.first_name or user.last_name %}
+        <p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+    {% endif %}
+    <p>Last Login: {{ user.last_login }}</p>
+    <p>Date Joined: {{ user.date_joined }}</p>
+    
+    <h3>Permissions:</h3>
+        <p>Staff status: {% if user.is_staff %}Yes{% else %}No{% endif %}</p>
+        <p>Superuser status: {% if user.is_superuser %}Yes{% else %}No{% endif %}</p>
+</div>
+{% endblock main %}
