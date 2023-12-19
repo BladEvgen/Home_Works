@@ -1,9 +1,4 @@
-import hashlib
 import sqlite3
-
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
 
 
 class Database:
@@ -13,7 +8,6 @@ class Database:
     def query(
         self,
         query_str: str,
-        database_path: str,
         args: tuple = (),
         many: bool = True,
         commit: bool = False,

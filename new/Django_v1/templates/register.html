@@ -11,8 +11,21 @@
                     <h2>Register</h2>
                 </div>
                 <div class="card-body">
+                     {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
                     <form method="post" action="{% url 'register' %}">
                         {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="firstname" class="form-label">FirstName</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">LastName</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>
