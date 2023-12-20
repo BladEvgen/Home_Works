@@ -8,15 +8,16 @@ from django.shortcuts import render, redirect
 from django_app import utils
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
-from pathlib import Path
-
-
-PRODUCT_DATABASE: str = "database/database.db"
-MAIN_DB = Path(__file__).resolve().parent.parent / "db.sqlite3"
+from django.core.cache import cache
 
 
 def home(request):
-    result_data = utils.get_exchange_data()
+    result_data = cache.get("home_result_data")
+
+    if result_data is None:
+        result_data = utils.get_exchange_data()
+        cache.set("home_result_data", result_data, 60 * 60)
+
     return render(
         request,
         "home.html",

@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-l%^r^+(al%#x3%6b3*b+gff1#z79vl$y8sce9%i14kvt9#n$t+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_app",
 ]
 
 MIDDLEWARE = [
@@ -97,32 +98,20 @@ DATABASES = {
 """
 
 
-"""
-
 CACHES = {
-    # Кэш в оперативной памяти
-    # + скорость
-    # - дорого, нельзя вынести на другой сервер
     # TODO - ВЫСОКО ПРИОРИТЕТНЫЕ ДАННЫЕ (домашняя страница)
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     },
-    # Кэш в базе данных
-    # + дешево
-    # - средняя скорость, находится там же, где и основная база
-    # вычисления(computing) - у учеников есть много критериев, оценки, успеваемость... Клас.руку нужно час высчитывать лучшего ученика. Лучший - Нурдаулет.
     # TODO - НИЗКО ПРИОРИТЕТНЫЕ ДАННЫЕ (страница с контактами)
-    "special": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache_table",
-        "TIMEOUT": "120",
-        "OPTIONS": {
-            # "MAX_ENTIES": 200,
-        },
-    },
-    # Внешний кэш
-    # + масштабируемость
-    # - сложнее
+    # "special": {
+    #     "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+    #     "LOCATION": "cache_table",
+    #     "TIMEOUT": "120",
+    #     "OPTIONS": {
+    #     "MAX_ENTIES": 200,
+    # },
+    # },
     # 'extra': {
     #     'BACKEND': 'django_redis.cache.RedisCache',
     #     'LOCATION': env("REDIS_LOCATION")',
@@ -134,8 +123,6 @@ CACHES = {
     # }
 }
 
-
-"""
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -161,7 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Almaty"
 
 USE_I18N = True
 

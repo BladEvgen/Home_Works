@@ -63,7 +63,6 @@ async def handle_request(request):
 
 @app.get("/")
 async def home(request):
-    
     return text("Home")
 
 

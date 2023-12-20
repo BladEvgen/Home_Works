@@ -1,4 +1,3 @@
-import sqlite3
 import requests
 from bs4 import BeautifulSoup
 
@@ -8,34 +7,6 @@ HEADERS = {
     "authority": "store.playstation.com",
     "sec-ch-ua-platform": '"Windows"',
 }
-
-
-class Database:
-    def __init__(self, database_path: str):
-        self.database_path = database_path
-
-    def query(
-        self,
-        query_str: str,
-        args: tuple = (),
-        many: bool = True,
-        commit: bool = False,
-    ) -> list | None:
-        with sqlite3.connect(self.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute(query_str, args)
-            try:
-                if many:
-                    result = cursor.fetchall()
-                else:
-                    result = cursor.fetchone()
-                if commit:
-                    connection.commit()
-                return result
-            except Exception as error:
-                print(f"Error executing query {str(error)} ")
-                return None
-
 
 def api_request(data: dict, res_type: any):
     response = requests.post("http://127.0.0.1:8001/api", json=data)
