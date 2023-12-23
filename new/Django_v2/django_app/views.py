@@ -3,14 +3,17 @@ views - контроллеры(вью) - т.е. бизнес логика
 """
 
 import datetime
-import requests as req
 from django.shortcuts import render, redirect
 from django_app import utils
+from django_app.utils import decorator_error_handler
+from django_app.models import Product, Review
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
+from django.contrib.auth.decorators import login_required
 
 
+@decorator_error_handler
 def home(request):
     result_data = cache.get("home_result_data")
 
@@ -36,6 +39,7 @@ def profile(request, username):
     return render(request, "profile.html", context={"username": username})
 
 
+@decorator_error_handler
 def product_list(request):
     data = {
         "database_id": 2,
@@ -47,20 +51,36 @@ def product_list(request):
     return render(request, "product_list.html", {"products": products})
 
 
+
+# @decorator_error_handler
 def product_detail(request, product_id):
-    data = {
-        "database_id": 2,
-        "query": "SELECT * FROM product WHERE id=?",
-        "args": (product_id,),
-        "many": False,
-    }
-    product_details = utils.api_request(data=data, res_type=None)
-    if product_details:
-        return render(
-            request, "product_detail.html", {"product_details": product_details}
+    try:
+        product = Product.objects.get(id=product_id)
+        reviews = Review.objects.filter(product=product, status=True)
+    except Product.DoesNotExist:
+        return render(request, "error.html", {"error": "Product not found"})
+
+    return render(
+        request, "product_detail.html", {"product": product, "reviews": reviews}
+    )
+
+
+@decorator_error_handler
+@login_required
+def add_review(request, product_id):
+    if request.method == "POST":
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return render(request, "error.html", {"error": "Product not found"})
+
+        content = request.POST.get("content")
+
+        Review.objects.create(
+            product=product, user=request.user, content=content, status=True
         )
 
-    return render(request, "product_detail.html", {"error": "Product not found"})
+    return redirect("product_detail", product_id=product_id)
 
 
 def login_view(request):
@@ -76,6 +96,7 @@ def login_view(request):
     return render(request, "login.html", context={})
 
 
+@decorator_error_handler
 def register(request):
     if request.method == "POST":
         firstname = request.POST.get("firstname")

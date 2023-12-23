@@ -15,6 +15,7 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("product_list", views.product_list, name="product_list"),
+    path("add_review/<int:product_id>/", views.add_review, name="add_review"),
     path(
         "product_detail/<int:product_id>/", views.product_detail, name="product_detail"
     ),
