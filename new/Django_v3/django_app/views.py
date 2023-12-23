@@ -89,13 +89,7 @@ def product_detail(request, product_id):
         reviews = reviews.filter(is_visible=True)
 
     return render(
-        request,
-        "product_detail.html",
-        {
-            "product": product,
-            "reviews": reviews,
-            "date": datetime.date.today(),
-        },
+        request, "product_detail.html", {"product": product, "reviews": reviews}
     )
 
 

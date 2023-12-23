@@ -18,13 +18,15 @@ def decorator_error_handler(view_func):
             response = view_func(request, *args, **kwargs)
         except Exception as error:
             print(f"{datetime.datetime.now()} ERROR {request.path}")
+            # TODO: error log - логи ошибок
+            # создавать файл, с записью в каждый час
             context = {"error_message": str(error)}
             return render(request, "error.html", context, status=500)
         else:
             return response
         finally:
             # TODO: action log - логи действий(переходы, клики...)
-            pass 
+            pass
 
     return wrapper
 
