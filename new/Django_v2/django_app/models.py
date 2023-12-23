@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -6,8 +7,9 @@ class Review(models.Model):
     product = models.ForeignKey("Product", on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
-    status = models.BooleanField(default=True)
-    visible_to_staff = models.BooleanField(default=True)
+    is_visible = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
 
 
 class Product(models.Model):

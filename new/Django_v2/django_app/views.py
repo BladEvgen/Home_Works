@@ -3,14 +3,14 @@ views - контроллеры(вью) - т.е. бизнес логика
 """
 
 import datetime
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django_app import utils
 from django_app.utils import decorator_error_handler
 from django_app.models import Product, Review
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
-from django.contrib.auth.decorators import login_required
+from django.http import Http404
 
 
 @decorator_error_handler
@@ -51,14 +51,42 @@ def product_list(request):
     return render(request, "product_list.html", {"products": products})
 
 
+def is_staff(user):
+    return user.is_staff
 
-# @decorator_error_handler
+
+@decorator_error_handler
 def product_detail(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
-        reviews = Review.objects.filter(product=product, status=True)
     except Product.DoesNotExist:
-        return render(request, "error.html", {"error": "Product not found"})
+        return render(request, "error.html", {"error": "Product not found"}, status=404)
+
+    reviews = Review.objects.filter(product=product)
+
+    if (
+        request.method == "POST"
+        and request.user.is_authenticated
+        and request.user.is_staff
+    ):
+        review_id = request.POST.get("review_id")
+        action = request.POST.get("action")
+
+        try:
+            review = Review.objects.get(id=review_id, product=product)
+        except Review.DoesNotExist:
+            raise Http404("Review not found")
+
+        if action == "hide":
+            review.is_visible = False
+        elif action == "unhide":
+            review.is_visible = True
+
+        review.save()
+        return redirect("product_detail", product_id=product_id)
+
+    if not request.user.is_staff:
+        reviews = reviews.filter(is_visible=True)
 
     return render(
         request, "product_detail.html", {"product": product, "reviews": reviews}
@@ -66,18 +94,13 @@ def product_detail(request, product_id):
 
 
 @decorator_error_handler
-@login_required
 def add_review(request, product_id):
     if request.method == "POST":
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            return render(request, "error.html", {"error": "Product not found"})
-
+        product = get_object_or_404(Product, id=product_id)
         content = request.POST.get("content")
 
         Review.objects.create(
-            product=product, user=request.user, content=content, status=True
+            product=product, user=request.user, content=content, is_visible=True
         )
 
     return redirect("product_detail", product_id=product_id)
