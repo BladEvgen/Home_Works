@@ -114,7 +114,7 @@ def login_view(request):
     return render(request, "login.html", context={})
 
 
-# @decorator_error_handler
+@decorator_error_handler
 def register(request):
     if request.method == "POST":
         firstname = request.POST.get("firstname")
