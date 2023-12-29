@@ -15,11 +15,13 @@
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
             <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
                 <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
-                <h3> DHL </h3>
+                <h3 class = "text-danger fst-italic"> DHL </h3>
             </a>
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="{% url 'home' %}" class="nav-link px-2 text-dark">Home</a></li>
                 <li><a href="{% url 'price_list' %}" class="nav-link px-2 text-dark">Prices</a></li>
+                <li><a href="{% url 'price_list_sql' %}" class="nav-link px-2 text-dark">Prices SQL</a></li>
+
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'profile' username=request.user.username %}" class="nav-link px-2 text-dark">Profile</a></li>
                 {% endif %}

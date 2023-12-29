@@ -1,14 +1,35 @@
 import datetime
 import random
+import sqlite3
 from django.shortcuts import render
 from .models import Price
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-    "sec-ch-ua": '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-    "authority": "store.playstation.com",
-    "sec-ch-ua-platform": '"Windows"',
-}
+
+class Database:
+    def __init__(self, database_path: str):
+        self.database_path = database_path
+
+    def query(
+        self,
+        query_str: str,
+        args: tuple = (),
+        many: bool = True,
+        commit: bool = False,
+    ) -> list | None:
+        with sqlite3.connect(self.database_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(query_str, args)
+            try:
+                if many:
+                    result = cursor.fetchall()
+                else:
+                    result = cursor.fetchone()
+                if commit:
+                    connection.commit()
+                return result
+            except Exception as error:
+                print(f"Error executing query {str(error)} ")
+                return None
 
 
 def decorator_error_handler(view_func):
@@ -39,7 +60,7 @@ def generate_random_prices():
         "Priority delivery for urgent shipments.",
     ]
 
-    Price.objects.all().delete()
+    # Price.objects.all().delete()
 
     for _ in range(100):
         name = random.choice(delivery_types)

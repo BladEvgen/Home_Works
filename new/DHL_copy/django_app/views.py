@@ -1,9 +1,17 @@
+from pathlib import Path
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django_app.utils import decorator_error_handler
+from django_app.utils import decorator_error_handler, generate_random_prices, Database
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from .models import Price
+
+MAIN_DB = Path(__file__).resolve().parent.parent / "db.sqlite3"
+
+
+def about(request):
+    return render(request, "about.html", context={})
 
 
 @decorator_error_handler
@@ -77,14 +85,77 @@ def profile(request, username):
 
 @decorator_error_handler
 def price_list(request):
+    cache_key = f"price_list_{request.GET.get('page', 1)}"
+
+    cached_result = cache.get(cache_key)
+    if cached_result:
+        return cached_result
+
     selected_page = request.GET.get("page", 1)
-
     prices = Price.objects.all()
+    p = Paginator(object_list=prices, per_page=40)
 
-    p = Paginator(object_list=prices, per_page=30)
-    current_page = p.page(number=selected_page)
-    return render(request, "price_list.html", context={"page_obj": current_page})
+    try:
+        current_page = p.page(number=selected_page)
+    except Exception:
+        current_page = p.page(p.num_pages)
+
+    page_range_start = max(1, current_page.number - 2)
+    page_range_end = min(p.num_pages, current_page.number + 1)
+    page_range = range(page_range_start, page_range_end + 1)
+
+    result = render(
+        request,
+        "price_list.html",
+        context={"page_obj": current_page, "page_range": page_range},
+    )
+
+    cache.set(cache_key, result, 5)
+
+    return result
 
 
-def about(request):
-    return render(request, "about.html", context={})
+@decorator_error_handler
+def price_list_sql(request):
+    selected_page = int(request.GET.get("page", 1))
+    items_per_page = 20
+
+    cache_key = f"price_list_sql_page_{selected_page}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
+    sql_query = """
+        SELECT id, name, description, price
+        FROM django_app_price
+    """
+
+    db = Database(MAIN_DB)
+    prices = db.query(sql_query, many=True)
+
+    p = Paginator(prices, items_per_page)
+
+    try:
+        current_page = p.page(selected_page)
+    except Exception:
+        current_page = p.page(p.num_pages)
+
+    page_range_start = max(1, current_page.number - 2)
+    page_range_end = min(p.num_pages, current_page.number + 1)
+    page_range = range(page_range_start, page_range_end + 1)
+
+    cache.set(
+        cache_key,
+        render(
+            request,
+            "price_list_sql.html",
+            context={"page_obj": current_page, "page_range": page_range},
+        ),
+        10,
+    )
+
+    return render(
+        request,
+        "price_list_sql.html",
+        context={"page_obj": current_page, "page_range": page_range},
+    )

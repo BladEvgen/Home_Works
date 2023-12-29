@@ -9,14 +9,14 @@
         <img src="{% static 'png/price.png' %}" class="mr-3 rounded-circle" alt="Price images" width="140" >
 
         <h2>Price List</h2>
-        <p>Ознакомьтесь с нашим прайс-листом и убедитесь, что мы предлагаем самые выгодные цены на доставку по различным регионам.</p>
+        <p class="text-wrap" style="width: 25rem;">Ознакомьтесь с нашим прайс-листом и убедитесь, что мы предлагаем самые выгодные цены на доставку по различным регионам.</p>
 
         <p><a class="btn btn-secondary" href="{% url 'price_list' %}">View details »</a></p>
       </div><!-- /.col-lg-4 -->
       <div class="col-lg-4">
          <img src="{% static 'png/about.png' %}" class="mr-3 rounded-circle" alt="Price images" width="140" >
         <h2>About Us</h2>
-        <p>Добро пожаловать на страницу "О нас". Здесь вы найдете подробную информацию о нашей компании, ее целях и принципах работы.</p>
+        <p class="text-wrap" style="width: 25rem;">Добро пожаловать на страницу "О нас". Здесь вы найдете подробную информацию о нашей компании, ее целях и принципах работы.</p>
 
         <p><a class="btn btn-secondary" href="{% url 'about' %}">View details »</a></p>
       </div><!-- /.col-lg-4 -->
@@ -24,12 +24,12 @@
         <img src="{% static 'png/login.png' %}" class="mr-3 rounded-circle" alt="User Avatar" width="140" >
         {% if request.user.is_authenticated %}
             <h2>Profile</h2>
-            <p>Личный кабинет предоставляет удобный доступ ко многим полезным функциям. Отслеживайте историю ваших заказов и многое другое.</p>
+            <p class="text-wrap" style="width: 25rem;">Личный кабинет предоставляет удобный доступ ко многим полезным функциям. Отслеживайте историю ваших заказов и многое другое.</p>
 
             <p><a class="btn btn-secondary" href="{% url 'profile' username=request.user.username %}">View details »</a></p>
         {% else %}
             <h2>Login</h2>
-            <p>Просматривайте и редактируйте вашу информацию. Мы ценим ваше участие и ваш профиль &ndash; это место, где вы можете управлять своими данными.</p>
+            <p class="text-wrap" style="width: 25rem;">Просматривайте и редактируйте вашу информацию. Мы ценим ваше участие и ваш профиль &ndash; это место, где вы можете управлять своими данными.</p>
             <p><a class="btn btn-secondary" href="{% url 'login' %}">View details »</a></p>
         {% endif %}
     </div><!-- /.col-lg-4 -->
