@@ -59,7 +59,7 @@ def product_detail(request, product_id):
 
     reviews = Review.objects.filter(product=product)
 
-    paginator = Paginator(reviews, 3) 
+    paginator = Paginator(reviews, 3)
 
     page = request.GET.get("page")
     try:
