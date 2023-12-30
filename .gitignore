@@ -172,3 +172,9 @@ new/flask/static/old/
 .DS_Store
 new/DHL_copy/click.txt
 new/DHL_copy/database/database.db
+new/DHL_copy/logs/click.txt
+new/Django_v3/database/database.db
+new/Django_v3/click.txt
+new/Django_v3/database/database.db
+new/Django_v3/database/database.db
+*.db

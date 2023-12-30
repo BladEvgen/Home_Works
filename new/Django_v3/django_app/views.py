@@ -9,9 +9,9 @@ from django_app import utils
 from django_app.utils import decorator_error_handler
 from django_app.models import Product, Review
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.http import Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 @decorator_error_handler
@@ -58,6 +58,16 @@ def product_detail(request, product_id):
         return render(request, "error.html", {"error": "Product not found"}, status=404)
 
     reviews = Review.objects.filter(product=product)
+
+    paginator = Paginator(reviews, 3) 
+
+    page = request.GET.get("page")
+    try:
+        reviews = paginator.page(page)
+    except PageNotAnInteger:
+        reviews = paginator.page(1)
+    except EmptyPage:
+        reviews = paginator.page(paginator.num_pages)
 
     if (
         request.method == "POST"

@@ -7,6 +7,7 @@ from django.shortcuts import render
 from .models import Price
 
 DB_PATH = Path(__file__).resolve().parent.parent / "database" / "database.db"
+LOGS_PATH = Path(__file__).resolve().parent.parent / "logs"
 
 
 class Database:
@@ -75,7 +76,7 @@ def decorator_error_handler(view_func):
             error = str(error)
             route = request.path
 
-            with open("logs.log", "a") as log_file:
+            with open(f"{LOGS_PATH}/logs.log", "a") as log_file:
                 log_file.write(f"{formatted_datetime} ERROR {request.path}: {error}\n")
 
             query_str = "INSERT INTO error_log (error_description, datetime, route) VALUES (?, ?, ?)"
@@ -94,7 +95,7 @@ def decorator_error_handler(view_func):
                 else "Anonymous_user"
             )
 
-            with open("click.txt", "a") as click_file:
+            with open(f"{LOGS_PATH}/click.txt", "a") as click_file:
                 click_file.write(
                     f'{formatted_datetime} Username: "{username}" clicked on "{request.path}" (elapsed time: {round(elapsed_time, 5)} seconds)\n'
                 )
