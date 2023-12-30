@@ -170,3 +170,5 @@ new/flask/templates/old/
 new/flask/static/old/
 
 .DS_Store
+new/DHL_copy/click.txt
+new/DHL_copy/database/database.db

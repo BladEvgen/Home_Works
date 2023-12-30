@@ -101,6 +101,7 @@ def add_review(request, product_id):
     return redirect("product_detail", product_id=product_id)
 
 
+@decorator_error_handler
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
