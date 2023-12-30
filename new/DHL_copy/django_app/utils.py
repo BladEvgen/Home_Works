@@ -68,24 +68,20 @@ def decorator_error_handler(view_func):
         start_time = perf_counter()
         db = Database(DB_PATH)
         current_time = datetime.datetime.now()
-
+        formatted_datetime = current_time.strftime("%H:%M:%S %d-%m-%Y")
         try:
             response = view_func(request, *args, **kwargs)
         except Exception as error:
-            error_message = str(error)
+            error = str(error)
             route = request.path
 
             with open("logs.log", "a") as log_file:
-                log_file.write(
-                    f"{current_time} ERROR {request.path}: {error_message}\n"
-                )
+                log_file.write(f"{formatted_datetime} ERROR {request.path}: {error}\n")
 
             query_str = "INSERT INTO error_log (error_description, datetime, route) VALUES (?, ?, ?)"
-            db.query(query_str, (error_message, current_time, route), commit=True)
+            db.query(query_str, (error, current_time, route), commit=True)
 
-            return render(
-                request, "error.html", {"error_message": error_message}, status=500
-            )
+            return render(request, "error.html", {"error": error}, status=500)
         else:
             return response
         finally:
@@ -97,7 +93,7 @@ def decorator_error_handler(view_func):
                 if request.user.is_authenticated
                 else "Anonymous_user"
             )
-            formatted_datetime = current_time.strftime("%H:%M:%S %d-%m-%Y")
+
             with open("click.txt", "a") as click_file:
                 click_file.write(
                     f'{formatted_datetime} Username: "{username}" clicked on "{request.path}" (elapsed time: {round(elapsed_time, 5)} seconds)\n'

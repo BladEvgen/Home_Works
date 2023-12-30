@@ -79,6 +79,7 @@ def logout_view(request):
     return redirect("home")
 
 
+@decorator_error_handler
 def profile(request, username):
     return render(request, "profile.html", context={"username": username})
 
