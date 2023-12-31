@@ -61,6 +61,17 @@ def create_tables():
     """
     db.query(query_str, commit=True)
 
+    query_str = """
+        CREATE TABLE IF NOT EXISTS price_data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            price REAL,
+            is_active BOOLEAN DEFAULT 1
+        )
+    """
+    db.query(query_str, commit=True)
+
 
 def decorator_error_handler(view_func):
     create_tables()
