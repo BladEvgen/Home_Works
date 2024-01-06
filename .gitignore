@@ -179,3 +179,4 @@ new/Django_v3/database/database.db
 new/Django_v3/database/database.db
 *.db
 new/Django_v3/database/database.db
+.DS_Store
