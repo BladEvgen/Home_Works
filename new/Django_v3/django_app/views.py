@@ -57,15 +57,12 @@ def product_detail(request, product_id):
     except Product.DoesNotExist:
         return render(request, "error.html", {"error": "Product not found"}, status=404)
 
-    original_reviews = Review.objects.filter(product=product, is_visible=True).order_by(
-        "-created_at"
-    )
+    reviews = Review.objects.filter(product=product).order_by("-created_at")
 
-    paginator = Paginator(original_reviews, 3)
+    if not request.user.is_staff:
+        reviews = reviews.filter(is_visible=True)
 
-    print("Paginator count:", paginator.count)
-    print("Paginator num_pages:", paginator.num_pages)
-    print("Paginator page_range:", paginator.page_range)
+    paginator = Paginator(reviews, 3)
 
     page = request.GET.get("page")
     try:
@@ -95,9 +92,6 @@ def product_detail(request, product_id):
 
         review.save()
         return redirect("product_detail", product_id=product_id)
-
-    if not request.user.is_staff:
-        original_reviews = original_reviews.filter(is_visible=True)
 
     return render(
         request,
