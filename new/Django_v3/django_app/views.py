@@ -50,24 +50,30 @@ def is_staff(user):
     return user.is_staff
 
 
-@decorator_error_handler
+# @decorator_error_handler
 def product_detail(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
         return render(request, "error.html", {"error": "Product not found"}, status=404)
 
-    reviews = Review.objects.filter(product=product)
+    original_reviews = Review.objects.filter(product=product, is_visible=True).order_by(
+        "-created_at"
+    )
 
-    paginator = Paginator(reviews, 3)
+    paginator = Paginator(original_reviews, 3)
+
+    print("Paginator count:", paginator.count)
+    print("Paginator num_pages:", paginator.num_pages)
+    print("Paginator page_range:", paginator.page_range)
 
     page = request.GET.get("page")
     try:
-        reviews = paginator.page(page)
+        paginated_reviews = paginator.page(page)
     except PageNotAnInteger:
-        reviews = paginator.page(1)
+        paginated_reviews = paginator.page(1)
     except EmptyPage:
-        reviews = paginator.page(paginator.num_pages)
+        paginated_reviews = paginator.page(paginator.num_pages)
 
     if (
         request.method == "POST"
@@ -91,10 +97,12 @@ def product_detail(request, product_id):
         return redirect("product_detail", product_id=product_id)
 
     if not request.user.is_staff:
-        reviews = reviews.filter(is_visible=True)
+        original_reviews = original_reviews.filter(is_visible=True)
 
     return render(
-        request, "product_detail.html", {"product": product, "reviews": reviews}
+        request,
+        "product_detail.html",
+        {"product": product, "reviews": paginated_reviews},
     )
 
 
