@@ -50,7 +50,7 @@ def is_staff(user):
     return user.is_staff
 
 
-# @decorator_error_handler
+@decorator_error_handler
 def product_detail(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
