@@ -21,6 +21,11 @@ class Product(models.Model):
         return self.name
 
 
+class CategoryItem(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    slug = models.CharField(max_length=255)
+
+
 class Package(models.Model):
     weight = models.FloatField()
     date_of_receipt = models.DateTimeField()

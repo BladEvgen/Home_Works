@@ -130,9 +130,9 @@ def login_view(request):
 @decorator_error_handler
 def register(request):
     if request.method == "POST":
-        firstname = request.POST.get("firstname")
-        lastname = request.POST.get("lastname")
-        email = request.POST.get("email")
+        # firstname = request.POST.get("firstname")
+        # lastname = request.POST.get("lastname")
+        # email = request.POST.get("email")
         username = request.POST.get("username")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
@@ -148,10 +148,10 @@ def register(request):
 
         user = User.objects.create_user(
             username=username,
-            email=email,
+            # email=email,
             password=password,
-            first_name=firstname,
-            last_name=lastname,
+            # first_name=firstname,
+            # last_name=lastname,
         )
 
         user = authenticate(request, username=username, password=password)
