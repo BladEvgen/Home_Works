@@ -116,3 +116,29 @@ class Review(models.Model):
     is_visible = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+
+class Vip(models.Model):
+    article = models.OneToOneField(
+        Item,
+        verbose_name="Объявление",
+        on_delete=models.CASCADE,
+        db_index=True,
+    )
+    priority = models.IntegerField(
+        verbose_name="Приоритет", 
+        default=5,
+    )
+    expired = models.DateTimeField(
+        verbose_name="дата и время истечения",
+        default=timezone.now,
+    )
+
+    class Meta:
+        app_label = "olx_copy"
+        ordering = ("priority", "-expired")
+        verbose_name = "Vip объявление"
+        verbose_name_plural = "Vip объявления"
+
+    def __str__(self):
+        return f"Vip: {self.article.title} ({self.id}) | Priority: {self.priority}"

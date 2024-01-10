@@ -1,7 +1,7 @@
+import datetime
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.core.cache import cache
 from django.contrib.auth.models import User
 from .utils import decorator_error_handler
 from olx_copy import models
@@ -12,6 +12,7 @@ def about(request):
     return render(request, "about.html", context={})
 
 
+@decorator_error_handler
 def search(request):
     if request.method == "POST":
         _search = request.POST.get("search", "")
@@ -24,7 +25,14 @@ def search(request):
 @decorator_error_handler
 def home(request):
     categories = models.CategoryItem.objects.all()
-    return render(request, "home.html", context={"categories": categories})
+    vips = (
+        models.Vip.objects.all()
+        .filter(expired__gt=datetime.datetime.now())
+        .order_by("priority", "-article")
+    )
+    return render(
+        request, "home.html", context={"categories": categories, "vips": vips}
+    )
 
 
 @decorator_error_handler
@@ -104,7 +112,7 @@ def add_review(request, product_id):
     return redirect("product_detail", product_id=product_id)
 
 
-# @decorator_error_handler
+@decorator_error_handler
 def product_detail(request, product_id):
     try:
         product = models.Item.objects.get(id=product_id)

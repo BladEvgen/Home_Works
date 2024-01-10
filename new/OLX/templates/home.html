@@ -1,36 +1,119 @@
-{% extends "components/base.html" %}
-
-{% block title %} Home {% endblock title %}
-
+{% extends "components/base.html" %} {% block title %} Home {% endblock title %}
 {% block main %}
 <style>
-    .custom-color{
-        background-color: #002F34;
-        color: #002F34;
-    }
-        </style>
+  .custom-color {
+    background-color: #002f34;
+    color: #002f34;
+  }
+</style>
 <div class="bg-transparent border border-gray rounded-3">
-<div class="collapse show " id="navbarToggleExternalContent">
-  <div class="bg-transparent p-4">
-    <h4 class="text-black h4 d-flex justify-content-center">Категории</h4>
-    <div class="container">
-      <ul class="list-unstyled d-flex flex-wrap justify-content-center m-1 p-1">
-        {% for c in categories %}
-          <li class="mb-2 me-4"><h5><a class="text-black text-decoration-none" href="{% url 'item' c.slug %}" class="text-black">{{ c.title }}</a></h5></li>
-        {% endfor %}
-      </ul>
+  <div class="collapse show" id="navbarToggleExternalContent">
+    <div class="bg-transparent p-4">
+      <h4 class="text-black h4 d-flex justify-content-center">Категории</h4>
+      <div class="container">
+        <ul
+          class="list-unstyled d-flex flex-wrap justify-content-center m-1 p-1">
+          {% for c in categories %}
+          <li class="mb-2 me-4">
+            <h5>
+              <a
+                class="text-black text-decoration-none"
+                href="{% url 'item' c.slug %}"
+                class="text-black"
+                >{{ c.title }}</a
+              >
+            </h5>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
-  
+  <nav class="navbar navbar-dark custom-color">
+    <div class="container-fluid">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarToggleExternalContent"
+        aria-controls="navbarToggleExternalContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
 </div>
-<nav class="navbar navbar-dark custom-color">
-  <div class="container-fluid">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+
+<div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+  <h1 class="display-4 fw-normal text-body-emphasis">VIP-товары</h1>
+  <p class="fs-5 text-body-secondary">Самые лучшие в категориях:</p>
+</div>
+
+<div class="row row-cols-1 row-cols-md-5 mb-3 text-center">
+  {% for v in vips %}
+  <div class="col">
+    <div class="card mb-4 rounded-3 shadow-sm">
+      <div class="card-header py-3">
+        <h4 class="my-0 fw-normal">{{ v.article.title }}</h4>
+      </div>
+      <div class="card-body">
+        <h1 class="card-title pricing-card-title">
+          {{ v.article.price }}<small class="text-body-secondary fw-light">
+            ₸</small
+          >
+        </h1>
+        <ul class="list-unstyled mt-3 mb-4">
+          <li>{{ v.article.description|slice:50 }}</li>
+        </ul>
+        <a
+          href="{% url 'product_detail' v.article.id %}"
+          type="button"
+          class="w-100 btn btn-lg btn-outline-primary"
+          >Детали</a
+        >
+      </div>
+    </div>
   </div>
-</nav>
+  {% endfor %}
 </div>
+<hr />
 
+<div class="container col-xxl-8 px-4 py-5">
+  <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+    <div class="col-10 col-sm-8 col-lg-6">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/6/60/OLX_Kazakhstan.jpg"
+        class="d-block mx-lg-auto img-fluid rounded-5"
+        alt="Bootstrap Themes"
+        width="350"
+        height="500"
+        loading="lazy" />
+    </div>
+    <div class="col-lg-6 display-5 fw-bold text-body-emphasis lh-1 mb-3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="2em"
+        height="2em"
+        viewBox="0 0 1024 1024"
+        data-aut-id="icon"
+        class="css-sxvywv">
+        <path
+          fill="currentColor"
+          fill-rule="evenodd"
+          d="M672.073 786.477H533.036V200.534h139.037v585.943zM483.019 493.596c0 133.44-108.16 241.419-241.419 241.419S0 626.855 0 493.596c0-133.259 108.16-241.419 241.419-241.419s241.6 107.98 241.6 241.419zm-168.289 0c0-40.447-32.683-73.13-73.13-73.13s-73.13 32.683-73.13 73.13c0 40.447 32.683 73.13 73.13 73.13s73.13-32.683 73.13-73.13zm708.909-146.802h-92.27l-54.17 54.17-54.17-54.17h-92.27v93.895l53.448 53.448-53.448 53.448v92.631h93.715l52.906-52.906 52.906 52.906h93.715v-92.631l-53.448-53.448 53.448-53.448v-93.895h-.361z"></path>
+      </svg>
+      <p class="lead">
+        Крупнейший онлайн-сервис объявлений Казахстана Все онлайн-объявления
+        Казахстана на OLX - здесь вы найдете то, что искали! Нажав на кнопку
+        "Подать объявление", вы сможете разместить объявление на любую тематику
+        легко и быстро. С помощью сервиса OLX вы сможете купить или продать из
+        рук в руки практически все, что угодно.
+      </p>
+      <div class="d-grid gap-2 d-md-flex justify-content-md-start">
 
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock main %}
