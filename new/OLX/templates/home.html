@@ -14,7 +14,7 @@
   <div class="bg-transparent p-4">
     <h4 class="text-black h4 d-flex justify-content-center">Категории</h4>
     <div class="container">
-      <ul class="list-unstyled d-flex flex-wrap">
+      <ul class="list-unstyled d-flex flex-wrap justify-content-center m-1 p-1">
         {% for c in categories %}
           <li class="mb-2 me-4"><h5><a class="text-black text-decoration-none" href="{% url 'item' c.slug %}" class="text-black">{{ c.title }}</a></h5></li>
         {% endfor %}
@@ -30,6 +30,7 @@
     </button>
   </div>
 </nav>
-<div>
+</div>
+
 
 {% endblock main %}
