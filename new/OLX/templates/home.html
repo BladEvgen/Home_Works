@@ -1,27 +1,35 @@
-{% extends "components/base.html" %} 
+{% extends "components/base.html" %}
 
 {% block title %} Home {% endblock title %}
 
 {% block main %}
-<div class="collapse" id="navbarToggleExternalContent">
-  <div class="bg-dark p-4">
-    <h5 class="text-white h4 d-flex justify-content-center justify-content">CATEGORY</h5>
-    <span class="text-muted">Toggleable via the navbar brand.</span>
+<style>
+    .custom-color{
+        background-color: #002F34;
+        color: #002F34;
+    }
+        </style>
+<div class="bg-transparent border border-gray">
+<div class="collapse show " id="navbarToggleExternalContent">
+  <div class="bg-transparent p-4">
+    <h4 class="text-black h4 d-flex justify-content-center">Категории</h4>
     <div class="container">
-        <ul>
-            {% for c in categories%}
-            <li> <a href="{% url 'item' c.slug %}">{{ c.title }}</a></li>
-            {% endfor %}
-        </ul>
+      <ul class="list-unstyled d-flex flex-wrap">
+        {% for c in categories %}
+          <li class="mb-2 me-4"><h5><a class="text-black text-decoration-none" href="{% url 'item' c.slug %}" class="text-black">{{ c.title }}</a></h5></li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
+  
 </div>
-<nav class="navbar navbar-dark bg-dark">
+<nav class="navbar navbar-dark custom-color">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
-
     </button>
   </div>
-</nav> 
+</nav>
+<div>
+
 {% endblock main %}

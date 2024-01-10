@@ -22,16 +22,23 @@
 .review-buttons {
     margin-left: 10px; 
 }
+  .custom-justified {
+    text-align: justify;
+  }
 </style>
 
 <div class="container mt-5">
     <h2 class="mb-4 text-center">Product Detail</h2>
-
+         {% if image_url %}
+        <div class="text-center">
+            <img src="{{ image_url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 450; max-height: 450px;">
+        </div>
+    {% endif %}
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">{{ product.name }}</h5>
             <p class="card-text">{{ product.description }}</p>
-            <p class="card-text text-muted">₽ {{ product.price }}</p>
+            <p class="card-text text-black fw-bold">{{ product.price }} ₸</p>
         </div>
     </div>
     {% if user.is_authenticated %}
@@ -54,7 +61,11 @@
                     <img src="{% static 'png/user.png' %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
                     <div class="media-body">
                         <h5 class="mt-0">{{ review.user.username }}</h5>
-                        <p>{{ review.content }}</p>
+{% if review.content|length > 200 %}
+                    <p class="d-flex justify-content-center custom-justified">{{ review.content }}</p>
+                {% else %}
+                    <p>{{ review.content }}</p>
+                    {%endif%}
                         <p class="text-muted">{{ review.created_at|date:"H:i d.m.Y" }}</p>
                     </div>
                 </div>

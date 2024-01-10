@@ -57,6 +57,13 @@ class Item(models.Model):
         null=False,
         max_length=255,
     )
+    image = models.ImageField(
+        upload_to="product_pictures/",
+        null=True,
+        blank=True,
+        verbose_name="Фото Продукта",
+    )
+
     description = models.TextField(
         verbose_name="Описание", unique=False, editable=True, blank=True
     )
@@ -86,6 +93,11 @@ class Item(models.Model):
         editable=True,
     )
 
+    def get_image_url(self):
+        if self.image:
+            return self.image.url
+        return None
+
     class Meta:
         app_label = "olx_copy"
         ordering = ("is_active", "-title")
@@ -95,3 +107,12 @@ class Item(models.Model):
     def __str__(self) -> str:
         status = "Активен" if self.is_active else "Продано"
         return f"Item(id={self.id}, Title={self.title}, Price={self.price}, Category={self.category.title}, Status={status})"
+
+
+class Review(models.Model):
+    product = models.ForeignKey("Item", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    is_visible = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
