@@ -9,12 +9,9 @@
     <span class="text-muted">Toggleable via the navbar brand.</span>
     <div class="container">
         <ul>
-            <li class="text-bg-danger"> Test </li>
-            <li class="text-bg-danger"> Test </li>
-            <li class="text-bg-danger"> Test </li>
-            <li class="text-bg-danger"> Test </li>
-            <li class="text-bg-danger"> Test </li>
-            <li class="text-bg-danger"> Test </li>
+            {% for c in categories%}
+            <li> <a href="{% url 'item' c.slug %}">{{ c.title }}</a></li>
+            {% endfor %}
         </ul>
     </div>
   </div>

@@ -180,3 +180,4 @@ new/Django_v3/database/database.db
 *.db
 new/Django_v3/database/database.db
 .DS_Store
+new/OLX/logs/click.txt
