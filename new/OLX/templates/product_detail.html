@@ -1,4 +1,5 @@
 {% extends "components/base.html" %}
+{% load django_app_filters_and_tags %}
 {% load static %}
 {% block title %}Product Detail{% endblock title %}
 {% block main %}
@@ -25,8 +26,13 @@
   .custom-justified {
     text-align: justify;
   }
-</style>
+  .old-price {
+    text-decoration: line-through;
+    color: #888; 
+    margin-right: 5px; 
+}
 
+</style>
 <div class="container mt-5">
     <h2 class="mb-4 text-center">Product Detail</h2>
          {% if image_url %}
@@ -38,21 +44,57 @@
         <div class="card-body">
             <h5 class="card-title">{{ product.name }}</h5>
             <p class="card-text">{{ product.description }}</p>
-            <p class="card-text text-black fw-bold">{{ product.price }} ₸</p>
+            
+            {% if product.discounted_price %}
+                <span class="old-price">{{ product.price|digit_beautify }} ₸</span>
+                <span class="new-price">{{ product.discounted_price|digit_beautify }} ₸</span>
+                <span class="discount-percentage">({{ product.discount_percentage }}% off)</span>
+            {% else %}
+                <span class="price">{{ product.price|digit_beautify }} ₸</span>
+            {% endif %}
         </div>
     </div>
-    {% if user.is_authenticated %}
-        <div class="mt-4">
-            <h4>Написать отзыв</h4>
-            <form method="post" action="{% url 'add_review' product.id %}">
-                {% csrf_token %}
-                <textarea name="content" class="form-control mb-2" placeholder="оставьте ваш отзыв здесь" required></textarea>
-                <button type="submit" class="btn btn-primary">Подтвердить</button>
-            </form>
-        </div>
-    {% else %}
-        <p class="mt-4"> <a href="/login" class="styled-link">Войдите</a> чтобы оставить отзыв</p>
-    {% endif %}
+
+{% if user.is_authenticated %}
+    <div class="mt-4">
+        {% if is_my_rating == 1 %}
+            <a href="{% url 'rating' product.id '1' %}"><i class="row fa-solid fa-thumbs-up text-success display-6 m-1 p-3"></i></a>
+        {% else %}
+            <a href="{% url 'rating' product.id '1' %}"><i class="row fa-regular fa-thumbs-up text-success display-6 m-1 p-3"></i></a>
+        {% endif %}
+        {%if total_rating_value < 0 %}
+            <div class="row display-6 text-danger m-1 p-1">Рейтинг товара: {{ total_rating_value }}</div>
+        {%else%}
+            <div class="row display-6 text-success m-1 p-1">Рейтинг товара: {{ total_rating_value }}</div>
+        {%endif%}
+
+        {% if is_my_rating == -1 %}
+            <a href="{% url 'rating' product.id '-1' %}"><i class="row fa-solid fa-thumbs-down display-6 text-danger m-1 p-3"></i></a>
+        {% else %}
+            <a href="{% url 'rating' product.id '-1' %}"><i class="row fa-regular fa-thumbs-down display-6 text-danger m-1 p-3"></i></a>
+        {% endif %}
+        <h4>Написать отзыв</h4>
+        <form method="post" action="{% url 'add_review' product.id %}">
+            {% csrf_token %}
+            <textarea name="content" class="form-control mb-2" placeholder="оставьте ваш отзыв здесь" required></textarea>
+            <button type="submit" class="btn btn-primary">Подтвердить</button>
+        </form>
+
+
+        <div class="display-6 text-danger m-1 p-1">{{ total_rating_value.dislikes }}</div>
+    </div>
+{% else %}
+     {%if total_rating_value < 0 %}
+            <div class=" row display-6 text-danger m-1 p-1">Рейтинг товара: {{ total_rating_value }}</div>
+        {%else%}
+            <div class="row display-6 text-success m-1 p-1">Рейтинг товара: {{ total_rating_value }}</div>
+        {%endif%}
+    <p class="mt-4"> <a href="{% url 'login' %}" class="styled-link">Войдите</a> чтобы оставить отзыв</p>
+{% endif %}
+
+
+
+
     <div class="mt-4">
         <h4>Отзывы</h4>
         {% for review in reviews %}
@@ -66,7 +108,7 @@
                         {% else %}
                     <p>{{ review.content }}</p>
                     {%endif%}
-                        <p class="text-muted">{{ review.created_at|date:"H:i d.m.Y" }}</p>
+                        <p class="text-muted">{{ review.created_at|relative_time }}</p>
                     </div>
                 </div>
                 {% if user.is_authenticated and user.is_staff %}

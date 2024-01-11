@@ -19,6 +19,7 @@ urlpatterns = [
     path(
         "product_detail/<int:product_id>/", views.product_detail, name="product_detail"
     ),
+    path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
 ]
 
 if settings.DEBUG:

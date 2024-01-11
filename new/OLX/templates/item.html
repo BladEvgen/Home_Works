@@ -1,4 +1,5 @@
 {% extends 'components/base.html' %}
+{% load django_app_filters_and_tags %}
 {% load static %}
 
 {% block main %}
@@ -8,10 +9,10 @@
             <div class="col">
                 <a href="{%url "product_detail" item.id %}" class="card text-decoration-none">
                     <div class="card-body">
-                        <h5 class="card-title">{{ item.title|slice:":25" }}</h5>
-                        <p class="card-text text-muted">{{ item.description|slice:":50" }}</p>
+                        <h5 class="card-title">{{ item.title|custom_cut:25 }}</h5>
+                        <p class="card-text text-muted">{{ item.description|custom_cut:50 }}</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-danger">{{ item.price }} ₸</span>
+                            <span class="text-danger">{{ item.price|digit_beautify }} ₸</span>
                         </div>
                     </div>
                 </a>

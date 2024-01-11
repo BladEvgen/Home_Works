@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .utils import decorator_error_handler
 from olx_copy import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.urls import reverse
 
 
 def about(request):
@@ -96,9 +97,9 @@ def profile(request, username):
 
 @decorator_error_handler
 def item(request, item_slug: str):
-    cat = models.CategoryItem.objects.get(slug=item_slug)
-    _item = models.Item.objects.all().filter(is_active=True, category=cat)
-    return render(request, "item.html", context={"items": _item})
+    cat = get_object_or_404(models.CategoryItem, slug=item_slug)
+    _items = models.Item.objects.all().filter(is_active=True, category=cat)
+    return render(request, "item.html", context={"items": _items})
 
 
 @decorator_error_handler
@@ -112,10 +113,10 @@ def add_review(request, product_id):
     return redirect("product_detail", product_id=product_id)
 
 
-@decorator_error_handler
+# @decorator_error_handler
 def product_detail(request, product_id):
     try:
-        product = models.Item.objects.get(id=product_id)
+        product = get_object_or_404(models.Item, id=product_id)
     except models.Item.DoesNotExist:
         raise Http404("Product not found")
 
@@ -126,6 +127,7 @@ def product_detail(request, product_id):
 
     paginator = Paginator(reviews, 3)
     page = request.GET.get("page", 1)
+
     try:
         paginated_reviews = paginator.page(page)
     except PageNotAnInteger:
@@ -137,8 +139,8 @@ def product_detail(request, product_id):
 
     if (
         request.method == "POST"
-        and request.user.is_staff
         and request.user.is_authenticated
+        and request.user.is_staff
     ):
         review_id = request.POST.get("review_id")
         action = request.POST.get("action")
@@ -156,8 +158,50 @@ def product_detail(request, product_id):
         review.save()
         return redirect("product_detail", product_id=product_id)
 
+    _ratings = models.ItemRating.objects.filter(item=product)
+    _total_rating_value = (
+        _ratings.filter(is_like=True).count() - _ratings.filter(is_like=False).count()
+    )
+
+    _my_rating = None
+
+    if request.user.is_authenticated:
+        _my_rating = _ratings.filter(author=request.user).first()
+
+    _is_my_rating = (
+        1
+        if (_my_rating and _my_rating.is_like)
+        else -1
+        if (_my_rating and not _my_rating.is_like)
+        else 0
+    )
+
     return render(
         request,
         "product_detail.html",
-        {"product": product, "reviews": paginated_reviews, "image_url": image_url},
+        {
+            "product": product,
+            "reviews": paginated_reviews,
+            "image_url": image_url,
+            "total_rating_value": _total_rating_value,
+            "is_my_rating": _is_my_rating,
+        },
     )
+
+
+def rating(request, item_id: str, is_like: str):
+    author = request.user
+    _item = get_object_or_404(models.Item, id=int(item_id))
+    _is_like = True if is_like == "1" else False
+
+    try:
+        like_obj = models.ItemRating.objects.get(author=author, item=_item)
+        if like_obj.is_like == _is_like:
+            like_obj.delete()
+        else:
+            like_obj.is_like = _is_like
+            like_obj.save()
+    except models.ItemRating.DoesNotExist:
+        models.ItemRating.objects.create(author=author, item=_item, is_like=_is_like)
+
+    return redirect(reverse("product_detail", args=(item_id,)))

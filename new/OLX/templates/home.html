@@ -1,4 +1,5 @@
 {% extends "components/base.html" %} {% block title %} Home {% endblock title %}
+{% load django_app_filters_and_tags %}
 {% block main %}
 <style>
   .custom-color {
@@ -59,12 +60,12 @@
       </div>
       <div class="card-body">
         <h1 class="card-title pricing-card-title">
-          {{ v.article.price }}<small class="text-body-secondary fw-light">
+          {{ v.article.price|digit_beautify }}<small class="text-body-secondary fw-light">
             ₸</small
           >
         </h1>
         <ul class="list-unstyled mt-3 mb-4">
-          <li>{{ v.article.description|slice:50 }}</li>
+          <li>{{ v.article.description|custom_cut:50 }}</li>
         </ul>
         <a
           href="{% url 'product_detail' v.article.id %}"
