@@ -159,30 +159,12 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
-
 .cmd
-
-scripts/
-new/Zayavka_db/.vscode/launch.json
 .vscode/
-*.xlsx
-new/flask/templates/old/
-new/flask/static/old/
-
 .DS_Store
-new/DHL_copy/click.txt
-new/DHL_copy/database/database.db
-new/DHL_copy/logs/click.txt
-new/Django_v3/database/database.db
-new/Django_v3/click.txt
-new/Django_v3/database/database.db
-new/Django_v3/database/database.db
 *.db
-new/Django_v3/database/database.db
-.DS_Store
-new/OLX/logs/click.txt
-new/OLX/media/product_pictures/xboxser_x.png
-new/OLX/media/product_pictures/DDR-5_DIMM_32_GB_6000_MHz_Team_Group_T-Force_Delta_RGB.png
-new/OLX/media/product_pictures/900px-Ps5.png
-new/OLX/media/product_pictures/xboxser_s.png
+
+new/DHL_copy/load_data.xlsx
+new/DHL_copy/scripts/script.txt
+*.txt
 *.jpg
