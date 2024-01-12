@@ -47,10 +47,10 @@
             
             {% if product.discounted_price %}
                 <span class="old-price">{{ product.price|digit_beautify }} ₸</span>
-                <span class="new-price">{{ product.discounted_price|digit_beautify }} ₸</span>
-                <span class="discount-percentage">({{ product.discount_percentage }}% off)</span>
+                <span class="new-price fw-bold">{{ product.discounted_price|digit_beautify }} ₸</span>
+                <span class="discount-percentage fw-bold">({{ product.discount_percentage }}% off)</span>
             {% else %}
-                <span class="price">{{ product.price|digit_beautify }} ₸</span>
+                <span class="price fw-bold">{{ product.price|digit_beautify }} ₸</span>
             {% endif %}
         </div>
     </div>

@@ -1,5 +1,4 @@
 from django import template
-from django.utils.translation import get_language
 from django.contrib.auth.models import User
 from django.utils.timesince import timesince
 from django.utils import timezone
@@ -17,18 +16,15 @@ def cutstom_cut(text: any, length: int) -> str:
 
 @register.filter(name="digit_beautify")
 def digit_beautify(value):
-    lang = get_language()
-
-    separator = "," if lang == "ru" else "."
-
-    if isinstance(value, int):
-        formatted_value = f"{value:,d}"
-    elif isinstance(value, str) and value.isdigit():
-        formatted_value = f"{float(value):,d}"
+    src = str(value)
+    if "." in src:
+        out, rnd = src.split(".")
     else:
-        formatted_value = str(value)
+        out, rnd = src, "0"
+    chunks = [out[max(i - 3, 0) : i] for i in range(len(out), 0, -3)][::-1]
+    formatted_out = " ".join(chunks)
 
-    return formatted_value
+    return f"{formatted_out}.{rnd}"
 
 
 @register.filter(name="relative_time")
