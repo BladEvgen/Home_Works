@@ -113,7 +113,7 @@ def add_review(request, product_id):
     return redirect("product_detail", product_id=product_id)
 
 
-# @decorator_error_handler
+@decorator_error_handler
 def product_detail(request, product_id):
     try:
         product = get_object_or_404(models.Item, id=product_id)
