@@ -8,21 +8,18 @@ def run_migrations():
 
     operating_system = os.name
 
-    # Change directory to the parent directory
     os.chdir(parent_directory)
 
-    # Activate the virtual environment based on the operating system
-    if operating_system == "posix":  # Linux or Mac OS
+    if operating_system == "posix":  
         activate_script = os.path.join(parent_directory, "env", "bin", "activate")
         activate_command = f"source {activate_script}"
-    elif operating_system == "nt":  # Windows
+    elif operating_system == "nt":  
         activate_script = os.path.join(parent_directory, "env", "Scripts", "activate")
         activate_command = f"call {activate_script}"
     else:
         print("Unsupported operating system")
         return
 
-    # Run migrations
     migrate_command = "python manage.py migrate"
 
     try:
