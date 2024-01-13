@@ -1,0 +1,37 @@
+{% extends "components/base.html" %}
+{% load django_app_filters_and_tags %}
+{% block title %} Home {% endblock title %}
+
+{% block main %}
+  <div class="container">
+    <div class="jumbotron mt-4">
+      <h1 class="display-4 text-center">Welcome to Our Product Showcase</h1>
+
+      {% if user.is_staff %}
+        <p class="lead text-center">As a staff member, you can create new products.</p>
+      {% else %}
+        <p class="lead text-center">Explore our diverse range of products below:</p>
+      {% endif %}
+    </div>
+
+    <div class="row justify-content-center">
+    {% for product in products %}
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card mb-4">
+                {% if product.picture and product.picture.url %}
+                    <img src="{{ product.picture.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://cdn.dribbble.com/users/683081/screenshots/2728654/media/7bb2b47d0574d39b20354620e4fa50c8.png" class="card-img-top" alt="{{ product.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|custom_cut:50 }}</p>
+                    <a href="{% url 'product_detail' product_id=product.id %}" class="btn btn-outline-danger btn-block">View Details</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+</div>
+{% endblock main %}

@@ -1,0 +1,24 @@
+{% extends "components/base.html" %}
+
+{% block title %} Product Detail {% endblock title %}
+
+{% block main %}
+  <div class="container">
+    <h2 class="text-center">{{ product.name }}</h2>
+
+    {% if product.picture %}
+      <div class="text-center mb-4">
+        <img src="{{ product.picture.url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 450px;">
+      </div>
+    {% endif %}
+
+    <p class="text-center mt-3">Description: {{ product.description }}</p>
+    <p class="text-center">Expiration Date: {{ product.expiration_date }}</p>
+
+    {% if product.qr_code %}
+      <div class="text-center mt-4">
+        <img src="{{ product.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 450px;">
+      </div>
+    {% endif %}
+  </div>
+{% endblock main %}
