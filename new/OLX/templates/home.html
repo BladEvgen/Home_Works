@@ -1,6 +1,5 @@
 {% extends "components/base.html" %} {% block title %} Home {% endblock title %}
-{% load django_app_filters_and_tags %}
-{% block main %}
+{% load django_app_filters_and_tags %} {% block main %}
 <style>
   .custom-color {
     background-color: #002f34;
@@ -51,7 +50,8 @@
   <p class="fs-5 text-body-secondary">Самые лучшие в категориях:</p>
 </div>
 
-<div class="row row-cols-1 row-cols-md-5  mb-3 text-center justify-content-center">
+<div
+  class="row row-cols-1 row-cols-md-5 mb-3 text-center justify-content-center">
   {% for v in vips %}
   <div class="col">
     <div class="card mb-4 rounded-3 shadow-sm">
@@ -60,7 +60,8 @@
       </div>
       <div class="card-body">
         <h1 class="card-title pricing-card-title">
-          {% digit_beautify  v.article.price%}<small class="text-body-secondary fw-light">
+          {% digit_beautify v.article.price%}<small
+            class="text-body-secondary fw-light">
             ₸</small
           >
         </h1>
@@ -92,8 +93,7 @@
         loading="lazy" />
     </div>
     <div class="col-lg-6 display-5 fw-bold text-body-emphasis lh-1 mb-3">
-    {% include "components/logo_olx.html" %}
-
+      {% include "components/logo_olx.html" %}
       <p class="lead">
         Крупнейший онлайн-сервис объявлений Казахстана Все онлайн-объявления
         Казахстана на OLX - здесь вы найдете то, что искали! Нажав на кнопку
@@ -101,9 +101,7 @@
         легко и быстро. С помощью сервиса OLX вы сможете купить или продать из
         рук в руки практически все, что угодно.
       </p>
-      <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-
-      </div>
+      <div class="d-grid gap-2 d-md-flex justify-content-md-start"></div>
     </div>
   </div>
 </div>

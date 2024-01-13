@@ -10,17 +10,17 @@ def run_migrations():
 
     os.chdir(parent_directory)
 
-    if operating_system == "posix":  
+    if operating_system == "posix":
         activate_script = os.path.join(parent_directory, "env", "bin", "activate")
         activate_command = f"source {activate_script}"
-    elif operating_system == "nt":  
+    elif operating_system == "nt":
         activate_script = os.path.join(parent_directory, "env", "Scripts", "activate")
         activate_command = f"call {activate_script}"
     else:
         print("Unsupported operating system")
         return
 
-    migrate_command = "python manage.py migrate"
+    migrate_command = "python manage.py makemigrations && python manage.py migrate"
 
     try:
         subprocess.run(
