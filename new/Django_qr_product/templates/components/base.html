@@ -62,10 +62,11 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_staff %}
-                    <li class="nav-item">
-                        <a href="{% url 'create_product' %}" class="nav-link btn btn-outline-success">Create New
-                            Product</a>
-                    </li>
+                        <div class="d-flex justify-content-start justify-content-lg-end">
+                            <li class="nav-item">
+                                <a href="{% url 'create_wine' %}" class="nav-link btn btn-outline-success">Create New Product</a>
+                            </li>
+                        </div>
                     {% endif %}
                 </ul>
             </div>
