@@ -4,15 +4,15 @@ from django.conf.urls.static import static
 from django_app import views
 
 urlpatterns = [
-    path("", views.home, name=""),
+    path("", views.home, name="home"),
     path("home", views.home, name="home"),
-    path("index", views.home, name="index"),
-    path("create/", views.create_product, name="create_product"),
-    path("product/<int:product_id>/", views.product_detail, name="product_detail"),
+    path("create/", views.create_wine, name="create_wine"),
+    path("wine/<int:wine_id>/", views.wine_detail, name="wine_detail"),
     path("register", views.register, name="register"),
     path("login", views.login_view, name="login"),
     path("logout", views.logout_view, name="logout"),
     path("profile/<str:username>/", views.profile, name="profile"),
+    path("wine/<int:wine_id>/", views.wine_detail, name="wine_detail"),
 ]
 
 if settings.DEBUG:
