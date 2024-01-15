@@ -7,14 +7,12 @@ from olx_copy import models
 register = template.Library()
 
 
-@register.filter(name="custom_cut")
-def cutstom_cut(text: any, length: int) -> str:
-    if len(str(text)) > length:
-        return str(text)[:length] + "..."
-    return str(text)
+@register.simple_tag
+def item_image_url(item):
+    return item.get_image_url() if item else None
 
 
-@register.filter(name="digit_beautify")
+@register.simple_tag
 def digit_beautify(value):
     src = str(value)
     if "." in src:
@@ -27,7 +25,7 @@ def digit_beautify(value):
     return f"{formatted_out}.{rnd}"
 
 
-@register.filter(name="relative_time")
+@register.simple_tag
 def relative_time(datetime_value):
     delta = timezone.now() - datetime_value
 
@@ -35,6 +33,13 @@ def relative_time(datetime_value):
         return timesince(datetime_value, timezone.now())
     else:
         return datetime_value.strftime("%H:%M %d.%m.%Y")
+
+
+@register.filter(name="custom_cut")
+def cutstom_cut(text: any, length: int) -> str:
+    if len(str(text)) > length:
+        return str(text)[:length] + "..."
+    return str(text)
 
 
 @register.filter(name="discount_percentage")

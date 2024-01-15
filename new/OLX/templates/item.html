@@ -12,8 +12,12 @@
                         <h5 class="card-title">{{ item.title|custom_cut:25 }}</h5>
                         <p class="card-text text-muted">{{ item.description|custom_cut:50 }}</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-danger">{{ item.price|digit_beautify }} ₸</span>
-                        </div>
+                             {% if item.discounted_price %}
+                                 <span class="text-danger">{% digit_beautify item.discounted_price %} ₸</span>
+                             {% else %}
+                                 <span class="text-danger">{% digit_beautify item.price %} ₸</span>
+                             {% endif %}
+                                                 </div>
                     </div>
                 </a>
             </div>

@@ -135,7 +135,6 @@ def product_detail(request, product_id):
     except EmptyPage:
         paginated_reviews = paginator.page(paginator.num_pages)
 
-    image_url = product.get_image_url()
 
     if (
         request.method == "POST"
@@ -182,7 +181,6 @@ def product_detail(request, product_id):
         {
             "product": product,
             "reviews": paginated_reviews,
-            "image_url": image_url,
             "total_rating_value": _total_rating_value,
             "is_my_rating": _is_my_rating,
         },
