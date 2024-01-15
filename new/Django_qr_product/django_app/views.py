@@ -1,28 +1,46 @@
 import qrcode
 from io import BytesIO
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product
+from .models import Wine, WineReview, Winery, WineCategory
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.utils import timezone
 
 
-def create_product(request):
+def create_wine(request):
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
+        production_date = request.POST.get("production_date")
         expiration_date = request.POST.get("expiration_date")
+        winery_id = request.POST.get("winery")
+        category_id = request.POST.get("category")
         picture = request.FILES.get("picture")
 
-        product = Product.objects.create(
+        try:
+            winery = Winery.objects.get(id=winery_id)
+            category = WineCategory.objects.get(id=category_id)
+        except Winery.DoesNotExist:
+            messages.error(request, "Selected Winery does not exist.")
+            return redirect("create_wine")
+        except WineCategory.DoesNotExist:
+            messages.error(request, "Selected Category does not exist.")
+            return redirect("create_wine")
+
+        wine = Wine.objects.create(
             name=name,
             description=description,
+            production_date=production_date,
             expiration_date=expiration_date,
+            winery=winery,
+            category=category,
             picture=picture,
         )
 
-        product_url = f"http://0.0.0.0:8000/product/{product.id}/"
+        wine_url = f"http://172.20.10.9:8000{wine.get_absolute_url()}"
 
         qr = qrcode.QRCode(
             version=1,
@@ -30,7 +48,7 @@ def create_product(request):
             box_size=10,
             border=4,
         )
-        qr.add_data(product_url)
+        qr.add_data(wine_url)
         qr.make(fit=True)
 
         qr_code_img = qr.make_image(fill_color="black", back_color="white")
@@ -39,25 +57,32 @@ def create_product(request):
         qr_code_img.save(buffer, format="PNG")
 
         qr_code_path = default_storage.save(
-            f"qr_codes/{product.id}.png", ContentFile(buffer.getvalue())
+            f"qr_codes/{wine.id}.png", ContentFile(buffer.getvalue())
         )
 
-        product.qr_code.name = qr_code_path
-        product.save()
+        wine.qr_code.name = qr_code_path
+        wine.save()
 
-        return redirect("product_detail", product_id=product.id)
+        return redirect(wine.get_absolute_url())
     else:
-        return render(request, "create_product.html")
+        wineries = Winery.objects.all()
+        categories = WineCategory.objects.all()
+        return render(
+            request,
+            "create_product.html",
+            {"wineries": wineries, "categories": categories},
+        )
 
 
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    return render(request, "product_detail.html", {"product": product})
+def wine_detail(request, wine_id):
+    wine = get_object_or_404(Wine, id=wine_id)
+    reviews = WineReview.objects.filter(wine=wine)
+    return render(request, "product_detail.html", {"wine": wine, "reviews": reviews})
 
 
 def home(request):
-    products = Product.objects.all()
-    return render(request, "home.html", context={"products": products})
+    wines = Wine.objects.filter(expiration_date__gt=timezone.now().date())
+    return render(request, "home.html", context={"wines": wines})
 
 
 def logout_view(request):
@@ -74,8 +99,10 @@ def login_view(request):
         if user is not None:
             login(request, user)
             return redirect("home")
+        else:
+            messages.error(request, "Invalid username or password. Please try again.")
 
-    return render(request, "login.html", context={})
+    return render(request, "login.html")
 
 
 def profile(request, username):
