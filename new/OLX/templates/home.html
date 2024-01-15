@@ -1,5 +1,7 @@
 {% extends "components/base.html" %} {% block title %} Home {% endblock title %}
-{% load django_app_filters_and_tags %} {% block main %}
+{% load django_app_filters_and_tags %} 
+{% load static %}
+{% block main %}
 <style>
   .custom-color {
     background-color: #002f34;
@@ -19,9 +21,9 @@
               <a
                 class="text-black text-decoration-none"
                 href="{% url 'item' c.slug %}"
-                class="text-black"
-                >{{ c.title }}</a
-              >
+                class="text-black">
+                {{ c.title }}
+                </a>
             </h5>
           </li>
           {% endfor %}
@@ -55,15 +57,21 @@
   {% for v in vips %}
   <div class="col">
     <div class="card mb-4 rounded-3 shadow-sm">
+      <div>
+        <img class="img-fluid" src="{{ v.article.get_image_url}}" alt="{{v.name}}" style="height:350px; max-height: auto; object-fit:cover;"> </img>
+      </div>
       <div class="card-header py-3">
         <h4 class="my-0 fw-normal">{{ v.article.title }}</h4>
       </div>
       <div class="card-body">
         <h1 class="card-title pricing-card-title">
-          {% digit_beautify v.article.price%}<small
-            class="text-body-secondary fw-light">
-            ₸</small
-          >
+          {%if v.article.discounted_price%}
+          {% digit_beautify v.article.discounted_price%}
+          <small class="text-body-secondary fw-light">₸</small>
+          {%else%}
+          {% digit_beautify v.article.price%}
+          <small class="text-body-secondary fw-light">₸</small>
+          {%endif%}
         </h1>
         <ul class="list-unstyled mt-3 mb-4">
           <li>{{ v.article.description|custom_cut:50 }}</li>
