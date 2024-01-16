@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.translation import activate
 
 
 def create_wine(request):
@@ -77,12 +78,21 @@ def create_wine(request):
 def wine_detail(request, wine_id):
     wine = get_object_or_404(Wine, id=wine_id)
     reviews = WineReview.objects.filter(wine=wine)
-    return render(request, "product_detail.html", {"wine": wine, "reviews": reviews})
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
+
+    return render(
+        request,
+        "product_detail.html",
+        {"wine": wine, "reviews": reviews, "selected_language": selected_language},
+    )
 
 
 def home(request):
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
     wines = Wine.objects.filter(expiration_date__gt=timezone.now().date())
-    return render(request, "home.html", context={"wines": wines})
+    return render(request, "home.html", context={"wines": wines, "selected_language": selected_language})
 
 
 def logout_view(request):
@@ -106,7 +116,13 @@ def login_view(request):
 
 
 def profile(request, username):
-    return render(request, "profile.html", context={"username": username})
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
+    return render(
+        request,
+        "profile.html",
+        context={"username": username, "selected_language": selected_language},
+    )
 
 
 def register(request):

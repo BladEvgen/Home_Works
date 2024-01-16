@@ -1,4 +1,5 @@
 {% extends "components/base.html" %}
+{% load django_app_filters_and_tags %}
 
 {% block title %}Profile{% endblock title %}
 
@@ -11,8 +12,8 @@
             {% if user.first_name or user.last_name %}
                 <p class="card-text">Имя: {{ user.first_name }} <br>Фамилия: {{ user.last_name }}</p>
             {% endif %}
-            <p class="card-text">Последний Вход: {{ user.last_login }}</p>
-            <p class="card-text">Дата Регистрации: {{ user.date_joined }}</p>
+            <p class="card-text">Последний Вход: {%formatted_time user.last_login %}</p>
+            <p class="card-text">Дата Регистрации: {%formatted_time user.date_joined %}</p>
 
             <h3 class="card-title">Права:</h3>
             <p class="card-text">Статус рабочего: {% if user.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>

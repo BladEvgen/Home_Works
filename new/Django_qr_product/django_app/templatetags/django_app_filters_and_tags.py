@@ -1,6 +1,8 @@
 from django import template
 from django.utils import timezone
 from django.utils.timesince import timesince
+from django.utils.translation import get_language
+from django.utils import formats
 
 register = template.Library()
 
@@ -38,3 +40,27 @@ def relative_time(datetime_value):
         return timesince(datetime_value, timezone.now())
     else:
         return datetime_value.strftime("%H:%M %d.%m.%Y")
+
+
+@register.simple_tag
+def formatted_date(date):
+    language = get_language()
+    if language == "en":
+        return date.strftime("%b. %d, %Y")
+    elif language == "ru":
+        return date.strftime("%d.%m.%Y")
+    else:
+        # ENG AS DEFAULT
+        return date.strftime("%b. %d, %Y")
+
+
+@register.simple_tag
+def formatted_time(time):
+    language = get_language()
+    if language == "en":
+        return formats.date_format(time, "M d Y g:i A")
+    elif language == "ru":
+        return time.strftime("%d.%m.%Y %H:%M")
+    else:
+        # ENG AS DEFAULT
+        return formats.date_format(time, "M d Y g:i A")
