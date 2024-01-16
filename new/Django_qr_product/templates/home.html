@@ -23,7 +23,7 @@
           <div class="col-sm-12 col-md-6 col-lg-4">
             <div class="card mb-4">
               {% if wine.picture and wine.picture.url %}  
-                <img src="{{ wine.picture.url }}" class="card-img-top img-fluid" alt="{{ wine.name }}" style="height: 500px; object-fit: cover;">
+                <img src="{{ wine.picture.url }}" class="card-img-top img-fluid" alt="{{ wine.name }}" style="height:500px; object-fit: cover;">
               {% else %}
                 <img src="https://cdn.dribbble.com/users/683081/screenshots/2728654/media/7bb2b47d0574d39b20354620e4fa50c8.png" class="card-img-top" alt="{{ wine.name }}">
               {% endif %}
