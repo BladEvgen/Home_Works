@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_app.middleware.ClickLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "django_settings.urls"
@@ -65,6 +66,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django_app.context_processors.current_year",
             ],
         },
     },
@@ -129,5 +131,5 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = "/media/" #/static/media
-MEDIA_ROOT = BASE_DIR / "static/media" #это норма медиа внутри статики хранить
+MEDIA_URL = "/media/"  # /static/media
+MEDIA_ROOT = BASE_DIR / "static/media"  # это норма медиа внутри статики хранить
