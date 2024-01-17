@@ -9,29 +9,33 @@
     
     <div class="mb-3">
       <label for="email" class="form-label">Email:</label>
-      <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+      <input type="email" name="email" class="form-control" value="{{ user.email }}" >
     </div>
 
     <div class="mb-3">
       <label for="first_name" class="form-label">First Name:</label>
-      <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+      <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" >
     </div>
 
     <div class="mb-3">
       <label for="last_name" class="form-label">Last Name:</label>
-      <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+      <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" >
     </div>
 
     <div class="mb-3">
       <label for="avatar" class="form-label">Avatar Preview:</label>
       <div class="avatar-preview-container">
-        <img id="avatar-preview" class="avatar-preview rounded-circle" src="{{ user_profile.get_avatar_url }}" alt="Avatar Preview">
+        {% if user_profile.get_avatar_url %}
+            <img id="avatar-preview" class="avatar-preview rounded-circle" src="{{ user_profile.get_avatar_url }}" alt="Avatar Preview">
+        {% else %}
+            <img id="avatar-preview" class="avatar-preview rounded-circle" src="{% static 'media/png/user.png' %}" alt="User Avatar" width="50">
+        {% endif %}
       </div>
     </div>
 
     <div class="mb-3">
       <label for="avatar" class="form-label">Choose Avatar:</label>
-      <input type="file" name="avatar" id="avatar" class="form-control">
+      <input type="file" name="avatar" id="avatar" class="form-control" accept=".jpg, .jpeg, .png, .webp"> 
     </div>
 
     <button type="submit" class="btn btn-primary">Update</button>
