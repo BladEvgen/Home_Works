@@ -47,6 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "olx_copy.middleware.ClickLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "django_settings.urls"
@@ -64,6 +65,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "olx_copy.context_processors.current_year",
             ],
         },
     },
@@ -117,6 +119,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
+STATIC_ROOT = Path(BASE_DIR / "staticroot")
+
+# массив с папками откуда джанго "собирает" статику
 STATICFILES_DIRS = [
     Path(BASE_DIR, "static"),
 ]
@@ -124,4 +129,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-MEDIA_ROOT = BASE_DIR / "media"
+
+MEDIA_URL = "/media/"  # /static/media
+MEDIA_ROOT = BASE_DIR / "static/media"  # это норма медиа внутри статики хранить

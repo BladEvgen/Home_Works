@@ -1,23 +1,54 @@
 {% extends "components/base.html" %}
-
+{% load django_app_filters_and_tags %}
+{%load static%}
 {% block title %}Profile{% endblock title %}
 
 {% block main %}
+<style>
+  .avatar-preview-container {
+    width: 100px; !important;
+    height: 100px; !important;
+    overflow: hidden; !important;
+    border-radius: 50%; !important;
+  }
+
+  .avatar-preview {
+    width: 100%; !important;
+    height: 100%; !important;
+    object-fit: cover; !important;
+  }
+</style>
 <div class="container mt-5">
     <div class="card">
-        <div class="card-body">
-            <h2 class="card-title">Здравствуйте, {{ user.username }}!</h2>
-            <p class="card-text">Email: {{ user.email }}</p>
-            {% if user.first_name or user.last_name %}
-                <p class="card-text">Имя: {{ user.first_name }} <br>Фамилия: {{ user.last_name }}</p>
-            {% endif %}
-            <p class="card-text">Последний Вход: {{ user.last_login }}</p>
-            <p class="card-text">Дата Регистрации: {{ user.date_joined }}</p>
-
-            <h3 class="card-title">Права:</h3>
-            <p class="card-text">Статус рабочего: {% if user.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
-            <p class="card-text">Админ: {% if user.is_superuser %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+                <div class="p-3 avatar-preview-container">
+                    {% if user.userprofile.get_avatar_url %}
+                    <img src="{{ user.userprofile.get_avatar_url }}?{{ user.userprofile.avatar.timestamp }}" class="avatar-preview rounded-circle" alt="User Avatar">
+                    {% else %}
+                    <img src="{% static 'png/user.png' %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
+                    {% endif %}
+            </div>
+            <div class="col-12 col-md-8">
+                <div class="position-absolute top-0 end-0 p-3">
+                    <a href="{% url 'change_data' user_profile.user.username %}" id="changeColor" class="text-warning">
+                        <i class="fas fa-wrench me-2" style="cursor: pointer; font-size: 1.5em;"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">Здравствуйте, {{ user.username }}!</h2>
+                    <p class="card-text">Email: {{ user.email }}</p>
+                    {% if user.first_name or user.last_name %}
+                        <p class="card-text">Имя: {{ user.first_name }} <br>Фамилия: {{ user.last_name }}</p>
+                    {% endif %}
+                    <p class="card-text">Последний Вход: {%formatted_time user.last_login %}</p>
+                    <p class="card-text">Дата Регистрации: {%formatted_time user.date_joined %}</p>
+                    <h3 class="card-title">Права:</h3>
+                    <p class="card-text">Статус рабочего: {% if user.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+                    <p class="card-text">Админ: {% if user.is_superuser %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+                </div>
+            </div>
         </div>
-    </div>
 </div>
+
+<script src="{% static 'js/edit_profile_button.js' %}"></script>
+
 {% endblock main %}

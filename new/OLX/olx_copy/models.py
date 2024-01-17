@@ -1,6 +1,34 @@
+import os
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from django.core.validators import FileExtensionValidator
+
+
+def user_avatar_path(instance, filename):
+    username = instance.user.username
+    return f"user_images/{username}/avatar_{username}.{filename.split('.')[-1]}"
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(
+        upload_to=user_avatar_path, null=True, blank=True, default="png/user.png"
+    )
+
+    def get_avatar_url(self):
+        return self.avatar.url if self.avatar else None
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old_avatar = UserProfile.objects.get(pk=self.pk).avatar
+            if old_avatar and self.avatar != old_avatar:
+                if os.path.isfile(old_avatar.path):
+                    os.remove(old_avatar.path)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
 
 
 class CategoryItem(models.Model):
@@ -54,7 +82,12 @@ class Item(models.Model):
         upload_to="product_pictures/",
         null=True,
         blank=True,
+        editable=True,
+        default=None,
         verbose_name="Фото Продукта",
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "webp"])
+        ],
     )
     description = models.TextField(verbose_name="Описание", blank=True)
     price = models.PositiveIntegerField(verbose_name="Цена")
@@ -76,7 +109,6 @@ class Item(models.Model):
         editable=False,
     )
 
-
     def calculate_discount_percentage(self):
         if self.discounted_price is not None and self.price > 0:
             discount = ((self.price - self.discounted_price) / self.price) * 100
@@ -85,7 +117,9 @@ class Item(models.Model):
 
     def save(self, *args, **kwargs):
         self.discount_percentage = self.calculate_discount_percentage()
-        print(f"Price: {self.price}, Discounted Price: {self.discounted_price}, Discount Percentage: {self.discount_percentage}")
+        print(
+            f"Price: {self.price}, Discounted Price: {self.discounted_price}, Discount Percentage: {self.discount_percentage}"
+        )
         super().save(*args, **kwargs)
 
     def get_image_url(self):

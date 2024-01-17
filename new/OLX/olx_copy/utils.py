@@ -5,7 +5,7 @@ from time import perf_counter
 from django.shortcuts import render
 
 DB_PATH = Path(__file__).resolve().parent.parent / "database" / "database.db"
-LOGS_PATH = Path(__file__).resolve().parent.parent / "logs"
+LOGS_PATH = Path(__file__).resolve().parent.parent / "log"
 
 
 class Database:

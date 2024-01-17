@@ -1,12 +1,16 @@
 import datetime
-from django.http import Http404
+import os
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .utils import decorator_error_handler
-from olx_copy import models
+from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
+from django.utils.translation import activate
+from olx_copy.utils import decorator_error_handler
+from olx_copy import models
 
 
 def about(request):
@@ -31,8 +35,16 @@ def home(request):
         .filter(expired__gt=datetime.datetime.now())
         .order_by("priority", "-article")
     )
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
     return render(
-        request, "home.html", context={"categories": categories, "vips": vips}
+        request,
+        "home.html",
+        context={
+            "categories": categories,
+            "vips": vips,
+            "selected_language": selected_language,
+        },
     )
 
 
@@ -91,8 +103,47 @@ def login_view(request):
 
 
 @decorator_error_handler
+@login_required
 def profile(request, username):
-    return render(request, "profile.html", context={"username": username})
+    user_profile = get_object_or_404(models.UserProfile, user=request.user)
+
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
+
+    return render(
+        request,
+        "profile.html",
+        context={"user_profile": user_profile, "selected_language": selected_language},
+    )
+
+
+@login_required
+def change_data(request, username):
+    user_profile = get_object_or_404(models.UserProfile, user=request.user)
+
+    if request.method == "POST":
+        email = request.POST.get("email")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+
+        request.user.email = email
+        request.user.first_name = first_name
+        request.user.last_name = last_name
+        request.user.save()
+
+        avatar = request.FILES.get("avatar")
+        if avatar:
+            old_avatar = user_profile.avatar
+            if old_avatar:
+                if os.path.isfile(old_avatar.path):
+                    os.remove(old_avatar.path)
+
+            user_profile.avatar = avatar
+
+        user_profile.save()
+        return HttpResponseRedirect(reverse("profile", args=[username]))
+
+    return render(request, "change_data.html", {"user_profile": user_profile})
 
 
 @decorator_error_handler
@@ -135,7 +186,6 @@ def product_detail(request, product_id):
     except EmptyPage:
         paginated_reviews = paginator.page(paginator.num_pages)
 
-
     if (
         request.method == "POST"
         and request.user.is_authenticated
@@ -174,6 +224,8 @@ def product_detail(request, product_id):
         if (_my_rating and not _my_rating.is_like)
         else 0
     )
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
 
     return render(
         request,
@@ -183,6 +235,7 @@ def product_detail(request, product_id):
             "reviews": paginated_reviews,
             "total_rating_value": _total_rating_value,
             "is_my_rating": _is_my_rating,
+            "selected_language": selected_language,
         },
     )
 
