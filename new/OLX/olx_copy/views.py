@@ -102,10 +102,10 @@ def login_view(request):
     return render(request, "login.html", context={})
 
 
-@decorator_error_handler
+# @decorator_error_handler
 @login_required
 def profile(request, username):
-    user_profile = get_object_or_404(models.UserProfile, user=request.user)
+    user_profile = get_object_or_404(models.UserProfile, user__username=username)
 
     selected_language = request.COOKIES.get("selected_language", "ENG")
     activate(selected_language)
