@@ -1,10 +1,11 @@
-import datetime
 import os
-from django.http import Http404, HttpResponseRedirect
+import datetime
+from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
@@ -102,7 +103,7 @@ def login_view(request):
     return render(request, "login.html", context={})
 
 
-# @decorator_error_handler
+@decorator_error_handler
 @login_required
 def profile(request, username):
     user_profile = get_object_or_404(models.UserProfile, user__username=username)
@@ -151,6 +152,38 @@ def item(request, item_slug: str):
     cat = get_object_or_404(models.CategoryItem, slug=item_slug)
     _items = models.Item.objects.all().filter(is_active=True, category=cat)
     return render(request, "item.html", context={"items": _items})
+
+
+@login_required
+def create_item(request):
+    if request.method == "POST":
+        title = request.POST.get("name")
+        picture = request.FILES.get("picture")
+        category_id = request.POST.get("category")
+        price = request.POST.get("price")
+        description = request.POST.get("description")
+
+        try:
+            category = get_object_or_404(models.CategoryItem, id=category_id)
+
+            author = request.user if request.user.is_authenticated else None
+
+            item = models.Item.objects.create(
+                title=title,
+                image=picture,
+                description=description,
+                price=price,
+                category=category,
+                author=author,
+            )
+
+            messages.success(request, "Item created successfully.")
+
+        except models.CategoryItem.DoesNotExist:
+            messages.error(request, "Selected Category does not exist.")
+
+    categories = models.CategoryItem.objects.all()
+    return render(request, "create_product.html", context={"categories": categories})
 
 
 @decorator_error_handler
@@ -238,6 +271,24 @@ def product_detail(request, product_id):
             "selected_language": selected_language,
         },
     )
+
+
+def delete_review(request, product_id):
+    if request.method == "POST" and request.user.is_authenticated:
+        review_id = request.POST.get("review_id")
+        product_id = request.POST.get("product_id")
+
+        try:
+            review = get_object_or_404(
+                models.Review, id=review_id, product__id=product_id, user=request.user
+            )
+        except models.Review.DoesNotExist:
+            raise Http404("Review not found")
+
+        review.delete()
+        return redirect("product_detail", product_id=product_id)
+
+    return HttpResponseForbidden("You don't have permission to perform this action.")
 
 
 def rating(request, item_id: str, is_like: str):

@@ -13,6 +13,7 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("item/<str:item_slug>/", views.item, name="item"),
+    path("create_item/", views.create_item, name="create_item"),
     path("search/", views.search, name="search"),
     path("add_review/<int:product_id>/", views.add_review, name="add_review"),
     path(
@@ -20,6 +21,7 @@ urlpatterns = [
     ),
     path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
     path("profile/<str:username>/change_data/", views.change_data, name="change_data"),
+    path("delete_review/<int:product_id>/", views.delete_review, name="delete_review"),
 ]
 
 if settings.DEBUG:
