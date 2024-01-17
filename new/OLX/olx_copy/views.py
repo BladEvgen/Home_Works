@@ -307,3 +307,21 @@ def rating(request, item_id: str, is_like: str):
         models.ItemRating.objects.create(author=author, item=_item, is_like=_is_like)
 
     return redirect(reverse("product_detail", args=(item_id,)))
+
+
+def chat(request):
+    _rooms = models.Room.objects.all()[::-1]
+    return render(request, "ChatPage.html", context={"rooms": _rooms})
+
+
+@login_required
+def room(request, room_slug: str, token: str):
+    _room = get_object_or_404(models.Room, slug=room_slug)
+
+    if not _room.is_valid_token(token):
+        return HttpResponseForbidden("Invalid token for this room")
+
+    _messages = models.Message.objects.filter(room=_room)[:30][::-1]
+    return render(
+        request, "RoomPage.html", context={"room": _room, "messages": _messages}
+    )

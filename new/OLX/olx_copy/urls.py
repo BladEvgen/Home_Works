@@ -2,6 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from olx_copy import views
+from olx_copy import views_a
 
 urlpatterns = [
     path("", views.home, name=""),
@@ -22,7 +23,15 @@ urlpatterns = [
     path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
     path("profile/<str:username>/change_data/", views.change_data, name="change_data"),
     path("delete_review/<int:product_id>/", views.delete_review, name="delete_review"),
+    # TODO CHAT WITH TOKEN
+    path("chat/", views.chat, name="chat"),
+    path("chat/<slug:room_slug>/<str:token>/", views.room, name="room"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+websocket_urlpatterns = [
+    path("ws/chat/<slug:room_name>/", views_a.ChatConsumer.as_asgi())
+]

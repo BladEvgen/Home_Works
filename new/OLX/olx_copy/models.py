@@ -41,12 +41,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     UserProfile.objects.get_or_create(user=instance)
 
 
-# @receiver(post_save, sender=User)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created and not hasattr(instance, "userprofile"):
-#         UserProfile.objects.create(user=instance)
-
-
 class CategoryItem(models.Model):
     title = models.CharField(
         max_length=255,
@@ -211,3 +205,93 @@ class ItemRating(models.Model):
 
     def __str__(self):
         return f"ItemRating(id={self.id}, Author={self.author.username}, Item={self.item.title}, Like={self.is_like})"
+
+
+# TODO PRIVATE CHAT
+
+
+class RoomManager(models.Manager):
+    def with_messages(self):
+        return self.prefetch_related("messages")
+
+
+class Room(models.Model):
+    name = models.CharField(
+        verbose_name="Наименование",
+        max_length=255,
+        db_index=True,
+        unique=False,
+        editable=True,
+        blank=True,
+        null=False,
+        default="",
+    )
+    slug = models.SlugField(
+        verbose_name="Ссылка",
+        max_length=300,
+        db_index=True,
+        unique=True,
+        editable=True,
+        blank=True,
+        null=False,
+        default="",
+    )
+
+    token = models.CharField(
+        verbose_name="Токен",
+        max_length=255,
+        db_index=True,
+        unique=True,
+        blank=True,
+        null=True,
+    )
+    objects = RoomManager()
+
+    def is_valid_token(self, provided_token):
+        return self.token == provided_token
+
+    class Meta:
+        app_label = "django_app"
+        ordering = ("-slug", "-name")
+
+    def __str__(self):
+        return f"Room: {self.name} ({self.slug})"
+
+
+class Message(models.Model):
+    user = models.ForeignKey(
+        verbose_name="Автор",
+        to=User,
+        on_delete=models.PROTECT,
+        related_name="messages",
+    )
+    room = models.ForeignKey(
+        verbose_name="Комната",
+        to=Room,
+        on_delete=models.PROTECT,
+        related_name="messages",
+    )
+    content = models.TextField(
+        verbose_name="Текст сообщения",
+        default="",
+        db_index=False,
+        unique=False,
+        editable=True,
+        blank=True,
+        null=False,
+    )
+    date_added = models.DateTimeField(
+        verbose_name="дата и время добавления",
+        default=timezone.now,
+        db_index=True,
+    )
+
+    class Meta:
+        app_label = "django_app"
+        ordering = ("-date_added", "-room")
+
+    def __str__(self):
+        truncated_content = (
+            self.content[:30] + "..." if len(self.content) > 30 else self.content
+        )
+        return f"Message from {self.user.username} in {self.room.name}: {truncated_content} ({self.date_added})"
