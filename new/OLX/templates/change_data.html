@@ -2,6 +2,21 @@
 {% load django_app_filters_and_tags %} 
 {% load static %}
 {% block main %}
+<style>
+  .avatar-preview-container {
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    border-radius: 50%;
+    margin-bottom: 20px; 
+  }
+
+  .avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
 <div class="container mt-5">
   <h2 class="mb-4">Update Profile</h2>
   <form method="post" enctype="multipart/form-data">
@@ -41,23 +56,6 @@
     <button type="submit" class="btn btn-primary">Update</button>
   </form>
 </div>
-
-<style>
-  .avatar-preview-container {
-    width: 100px;
-    height: 100px;
-    overflow: hidden;
-    border-radius: 50%;
-    margin-bottom: 20px; 
-  }
-
-  .avatar-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-</style>
-
 <script>
   function updateAvatarPreview() {
     var input = document.getElementById('avatar');
