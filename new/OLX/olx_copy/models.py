@@ -25,7 +25,10 @@ class UserProfile(models.Model):
         if self.pk:
             old_avatar = UserProfile.objects.get(pk=self.pk).avatar
             if old_avatar and self.avatar != old_avatar:
-                if os.path.isfile(old_avatar.path):
+                if (
+                    os.path.isfile(old_avatar.path)
+                    and old_avatar.path != "png/user.png"
+                ):
                     os.remove(old_avatar.path)
         super().save(*args, **kwargs)
 
@@ -35,14 +38,13 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    if created and not hasattr(instance, "userprofile"):
-        UserProfile.objects.create(user=instance)
+    UserProfile.objects.get_or_create(user=instance)
 
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, "userprofile"):
-        instance.userprofile.save()
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created and not hasattr(instance, "userprofile"):
+#         UserProfile.objects.create(user=instance)
 
 
 class CategoryItem(models.Model):
@@ -91,6 +93,17 @@ class TagItem(models.Model):
 
 
 class Item(models.Model):
+    author = models.ForeignKey(
+        verbose_name="Автор",
+        db_index=True,
+        primary_key=False,
+        editable=True,
+        blank=True,
+        null=False,
+        default=None,
+        to=User,
+        on_delete=models.CASCADE,
+    )
     title = models.CharField(max_length=255, verbose_name="Наименование")
     image = models.ImageField(
         upload_to="product_pictures/",
