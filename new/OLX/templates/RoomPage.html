@@ -45,22 +45,9 @@
     const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
     const userName = JSON.parse(document.getElementById('json-username').textContent);
     const yourToken = JSON.parse(document.getElementById('json-token').textContent);
-
-    console.log('WebSocket URL:', 'ws://' + window.location.host + '/ws/chat/' + roomName + '/?token=' + yourToken);
-    console.log('roomName:', roomName);
-    console.log('YOUR_TOKEN:', yourToken);
-
     const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/?token=' + yourToken);
 
-    
-    
-    // 'ws://127.0.0.1:8000/ws/chat/first/'
-    // браузер открывает вебсокет и "слушает" сообщения от сервера
-
-    // chatSocket.close() // принудительное закрытие сокета
-
     chatSocket.onmessage = function(e) {
-        // каждый раз, когда приходит сообщение, он его добавлени на страницу HTML
         const data = JSON.parse(e.data);
         //
         if(data.message){
@@ -76,9 +63,7 @@
         console.log("Bye!")
     }
     document.querySelector('#chat-message-submit').onclick = function(e){
-        // сообщение при попытке отправиться, уходит по вебсокету
-
-        e.preventDefault()  // остановка стандартных событий, остановка отправки формы
+        e.preventDefault()  
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
         chatSocket.send(JSON.stringify({
