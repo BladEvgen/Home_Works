@@ -11,15 +11,19 @@
 
 <h1>Chat page ({{request.user.username}})</h1>
 <div>
+        {% if request.user.is_authenticated %}
+
     <ul>
+
         {% for room in rooms %}
             <li>
-<a href="{% url 'room' room.slug room.token %}">{{room.name}}</a>
+            <a href="{% url 'room' room.slug room.token %}">Messages to {{room.name}}</a>
             </li>
         {% empty %}
             <li>ни одной комнаты не создано!</li>
         {% endfor %}
     </ul>
+    {%endif%}
 </div>
 
 </body>

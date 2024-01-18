@@ -3,48 +3,14 @@
 {% load static %}
 {% block title %}Product Detail{% endblock title %}
 {% block main %}
-<style>   
-.styled-link {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-}
-.styled-link:hover {
-    text-decoration: underline;
-}
-.review-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-.review-content {
-    flex: 1;
-}
-.review-buttons {
-    margin-left: 10px; 
-}
-  .custom-justified {
-    text-align: justify;
-  }
-  .old-price {
-    text-decoration: line-through;
-    color: #888; 
-    margin-right: 5px; 
-}
-
-</style>
 <div class="container mt-5">
-
-{% comment %} 
-    {%if request.user == product.author%}
-    <h1>Hello world </h1>
-    {%endif%} {% endcomment %}
     <h2 class="mb-4 text-center">{{ product.title }}</h2>
         <div class="text-center">
             <img src="{% item_image_url product %}" alt="{{ product.title }}" class="img-fluid" style="max-width: 450; max-height: 450px;">
         </div>
     <div class="card">
         <div class="card-body">
+
             <h5 class="card-title">Описание</h5>
             <p class="card-text">{{ product.description }}</p>
             
@@ -58,6 +24,11 @@
         </div>
     </div>
     {% if user.is_authenticated %}
+            {%if request.user != product.author%}
+            <a href="#" class="chat-icon display-5" onclick="openChat('{{ product.author.username }}', {{ product.id }})">
+                <i class="fa-solid fa-comment"></i>
+            </a>
+            {%endif%}
         <div class="mt-4">
             {% if is_my_rating == 1 %}
                 <a href="{% url 'rating' product.id '1' %}"><i class="row fa-solid fa-thumbs-up text-success display-6 m-1 p-3"></i></a>
@@ -142,10 +113,37 @@
         {% endif %}
     {% endfor %}
 </div>
-
 </div>
+<script>
+    function openChat(authorUsername, itemId) {
+        console.log('Attempting to create chat room...');
+
+        if (!itemId) {
+            console.error('Invalid itemId:', itemId);
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "create_chat_room" %}',
+            data: {
+                'author_username': authorUsername,
+                'item_id': itemId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.location.href = response.room_url;
+                } else {
+                    alert('Error creating chat room - Success response is false');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error creating chat room - ' + textStatus + ': ' + errorThrown);
+                console.log('Server response:', jqXHR.responseJSON);
+            }
+        });
+    }
+</script>
 {% include "components/paginator.html" %}
-
-
-
 {% endblock main %}
