@@ -108,6 +108,11 @@
               </li>
               {% endif %}
             </ul>
+            {% if request.user.is_authenticated %}
+            <a href="#" class="btn btn-outline-none text-danger">
+              test
+            </a>
+            {%endif%}
             <form
               class="d-flex justify-content-center justify-content-lg-end"
               method="post"
