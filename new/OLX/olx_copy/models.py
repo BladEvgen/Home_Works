@@ -1,4 +1,5 @@
 import os
+import uuid
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -209,7 +210,6 @@ class ItemRating(models.Model):
 
 # TODO PRIVATE CHAT
 
-
 class RoomManager(models.Manager):
     def with_messages(self):
         return self.prefetch_related("messages")
@@ -244,18 +244,32 @@ class Room(models.Model):
         unique=True,
         blank=True,
         null=True,
+        default=uuid.uuid4,
     )
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = str(uuid.uuid4())
+        super(Room, self).save(*args, **kwargs)
+
     objects = RoomManager()
 
     def is_valid_token(self, provided_token):
         return self.token == provided_token
 
     class Meta:
-        app_label = "django_app"
+        app_label = "olx_copy"
         ordering = ("-slug", "-name")
 
     def __str__(self):
         return f"Room: {self.name} ({self.slug})"
+
+
+@receiver(post_save, sender=Room)
+def create_token_for_existing_rooms(sender, instance, **kwargs):
+    if not instance.token:
+        instance.token = str(uuid.uuid4())
+        instance.save()
 
 
 class Message(models.Model):
@@ -287,7 +301,7 @@ class Message(models.Model):
     )
 
     class Meta:
-        app_label = "django_app"
+        app_label = "olx_copy"
         ordering = ("-date_added", "-room")
 
     def __str__(self):

@@ -10,10 +10,9 @@ from django.core.exceptions import ObjectDoesNotExist
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.token = self.scope["query_string"].decode("utf-8").split("=")[1]
+        self.token = await self.extract_and_validate_token()
 
-        # Validate the token before connecting
-        if not await self.is_valid_token():
+        if not self.token:
             await self.close()
             return
 
@@ -21,9 +20,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+        print("WebSocket connected")
+
+    async def extract_and_validate_token(self):
+        try:
+            query_string = self.scope["query_string"].decode("utf-8")
+            token_param = query_string.split("=")
+            if len(token_param) == 2:
+                token = token_param[1]
+                if await self.is_valid_token(token):
+                    return token
+        except IndexError:
+            pass
+        return None
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        print("WebSocket disconnected with code:", code)
 
     async def receive(self, text_data: bytes):
         data = json.loads(text_data)
@@ -42,6 +55,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "room": room,
             },
         )
+        print('Received WebSocket message:', text_data.decode('utf-8'))
+
 
     async def chat_message(self, event):
         message = event["message"]
@@ -59,10 +74,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
-    def is_valid_token(self):
+    def is_valid_token(self,token):
         try:
             room = models.Room.objects.get(slug=self.room_name)
-            return room.token == self.token
+            return room.token == token
         except ObjectDoesNotExist:
             return False
 
