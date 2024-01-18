@@ -1,10 +1,16 @@
 import os
 import datetime
-from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
+from django.http import (
+    Http404,
+    HttpResponseRedirect,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -311,7 +317,11 @@ def rating(request, item_id: str, is_like: str):
 
 def chat(request):
     _rooms = models.Room.objects.all()[::-1]
-    return render(request, "ChatPage.html", context={"rooms": _rooms})
+    return render(
+        request,
+        "ChatPage.html",
+        context={"rooms": _rooms, "current_user": request.user},
+    )
 
 
 @login_required
@@ -325,3 +335,46 @@ def room(request, room_slug: str, token: str):
     return render(
         request, "RoomPage.html", context={"room": _room, "messages": _messages}
     )
+
+@csrf_exempt
+def create_chat_room(request):
+    try:
+        if request.method == "POST" and request.user.is_authenticated:
+            item_id = request.POST.get("item_id")
+
+            try:
+                item = get_object_or_404(models.Item, pk=item_id)
+            except models.Item.DoesNotExist:
+                print(f"Item with ID {item_id} not found")
+                return JsonResponse({"success": False, "error": "Item not found"})
+
+            existing_room = models.Room.objects.filter(
+                name=request.user.username, item=item
+            ).first()
+
+            print(f"\nItem ID: {item_id} \nExisting Room: {existing_room}\n")
+
+            if existing_room:
+                room_slug = existing_room.slug
+                room_token = existing_room.token
+            else:
+                room = models.Room(name=request.user.username, item=item)
+                room.save()
+                room_slug = room.slug
+                room_token = room.token
+
+            print(f"Room Slug: {room_slug}\nRoom Token: {room_token}")
+
+            print(f"Request user: {request.user.username}")
+
+            if room_slug:
+                room_url = reverse("room", args=[room_slug, room_token])
+                print(f"\nRoom created - URL: {room_url}")
+                return JsonResponse({"success": True, "room_url": room_url})
+            else:
+                print("\nEmpty room_slug encountered\n")
+                return JsonResponse({"success": False, "error": "Empty room_slug"})
+
+    except Exception as e:
+        print("Exception in create_chat_room:", str(e))
+        return JsonResponse({"success": False, "error": str(e)})

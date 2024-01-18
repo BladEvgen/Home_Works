@@ -26,6 +26,7 @@ urlpatterns = [
     # TODO CHAT WITH TOKEN
     path("chat/", views.chat, name="chat"),
     path("chat/<slug:room_slug>/<str:token>/", views.room, name="room"),
+    path("create_chat_room/", views.create_chat_room, name="create_chat_room"),
 ]
 
 if settings.DEBUG:

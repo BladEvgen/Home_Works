@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 
 
 def user_avatar_path(instance, filename):
@@ -210,6 +211,7 @@ class ItemRating(models.Model):
 
 # TODO PRIVATE CHAT
 
+
 class RoomManager(models.Manager):
     def with_messages(self):
         return self.prefetch_related("messages")
@@ -232,7 +234,7 @@ class Room(models.Model):
         db_index=True,
         unique=True,
         editable=True,
-        blank=True,
+        blank=False,
         null=False,
         default="",
     )
@@ -247,15 +249,19 @@ class Room(models.Model):
         default=uuid.uuid4,
     )
 
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = str(uuid.uuid4())
-        super(Room, self).save(*args, **kwargs)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     objects = RoomManager()
 
     def is_valid_token(self, provided_token):
         return self.token == provided_token
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = f"{self.name}_room"  
+        if not self.token:
+            self.token = str(uuid.uuid4())
+        super(Room, self).save(*args, **kwargs)
 
     class Meta:
         app_label = "olx_copy"
@@ -263,6 +269,13 @@ class Room(models.Model):
 
     def __str__(self):
         return f"Room: {self.name} ({self.slug})"
+
+
+@receiver(post_save, sender=Room)
+def create_slug_for_room(sender, instance, created, **kwargs):
+    if created and not instance.slug:
+        instance.slug = f"{slugify(instance.name)}-{uuid.uuid4().hex[:8]}"
+        instance.save()
 
 
 @receiver(post_save, sender=Room)
