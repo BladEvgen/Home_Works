@@ -52,41 +52,36 @@
   <p class="fs-5 text-body-secondary">Самые лучшие в категориях:</p>
 </div>
 
-<div
-  class="row row-cols-1 row-cols-md-5 mb-3 text-center justify-content-center">
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 mb-3 text-center justify-content-center">
   {% for v in vips %}
   <div class="col">
     <div class="card mb-4 rounded-3 shadow-sm">
       <div>
-        <img class="img-fluid" src="{{ v.article.get_image_url}}" alt="{{v.name}}" style="height:350px; max-height: auto; object-fit:cover;"> </img>
+        <img class="img-fluid" src="{{ v.article.get_image_url }}" alt="{{ v.name }}" style="height:250px; max-width:100%; object-fit: cover;">
       </div>
       <div class="card-header py-3">
         <h4 class="my-0 fw-normal">{{ v.article.title }}</h4>
       </div>
       <div class="card-body">
         <h1 class="card-title pricing-card-title">
-          {%if v.article.discounted_price%}
-          {% digit_beautify v.article.discounted_price%}
+          {% if v.article.discounted_price %}
+          {% digit_beautify v.article.discounted_price %}
           <small class="text-body-secondary fw-light">₸</small>
-          {%else%}
-          {% digit_beautify v.article.price%}
+          {% else %}
+          {% digit_beautify v.article.price %}
           <small class="text-body-secondary fw-light">₸</small>
-          {%endif%}
+          {% endif %}
         </h1>
         <ul class="list-unstyled mt-3 mb-4">
           <li>{{ v.article.description|custom_cut:50 }}</li>
         </ul>
-        <a
-          href="{% url 'product_detail' v.article.id %}"
-          type="button"
-          class="w-100 btn btn-lg btn-outline-primary"
-          >Детали</a
-        >
+        <a href="{% url 'product_detail' v.article.id %}" type="button" class="w-100 btn btn-lg btn-outline-primary">Детали</a>
       </div>
     </div>
   </div>
   {% endfor %}
 </div>
+
 <hr />
 
 <div class="container col-xxl-8 px-4 py-5">
