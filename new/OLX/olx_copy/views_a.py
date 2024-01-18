@@ -20,7 +20,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        print("WebSocket connected")
+        # print("WebSocket connected")
 
     async def extract_and_validate_token(self):
         try:
@@ -36,7 +36,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        print("WebSocket disconnected with code:", code)
+        # print("WebSocket disconnected with code:", code)
 
     async def receive(self, text_data: str):
         data = json.loads(text_data)
