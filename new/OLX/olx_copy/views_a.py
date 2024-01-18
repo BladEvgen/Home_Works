@@ -38,7 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         print("WebSocket disconnected with code:", code)
 
-    async def receive(self, text_data: bytes):
+    async def receive(self, text_data: str):
         data = json.loads(text_data)
         username = data["username"]
         room = data["room"]
@@ -55,7 +55,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "room": room,
             },
         )
-        print('Received WebSocket message:', text_data.decode('utf-8'))
 
 
     async def chat_message(self, event):
@@ -74,7 +73,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
-    def is_valid_token(self,token):
+    def is_valid_token(self, token):
         try:
             room = models.Room.objects.get(slug=self.room_name)
             return room.token == token
