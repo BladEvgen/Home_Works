@@ -206,7 +206,7 @@ class ItemRating(models.Model):
         verbose_name_plural = "Рейтинги товаров"
 
     def __str__(self):
-        return f"ItemRating(id={self.id}, Author={self.author.username}, Item={self.item.title}, Like={self.is_like})"
+        return f"ItemRating(id={self.id},\n Author={self.author.username},\n Item={self.item.title},\n Like={self.is_like})"
 
 
 # TODO PRIVATE CHAT
@@ -258,7 +258,7 @@ class Room(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = f"{self.name}_room"  
+            self.slug = f"room_id_{str(uuid.uuid4())[:8]}"
         if not self.token:
             self.token = str(uuid.uuid4())
         super(Room, self).save(*args, **kwargs)
@@ -295,7 +295,7 @@ class Message(models.Model):
     room = models.ForeignKey(
         verbose_name="Комната",
         to=Room,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="messages",
     )
     content = models.TextField(
