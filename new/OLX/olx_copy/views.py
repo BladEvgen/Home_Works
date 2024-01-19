@@ -18,6 +18,7 @@ from django.urls import reverse
 from django.utils.translation import activate
 from olx_copy.utils import decorator_error_handler
 from olx_copy import models
+from django.db.models import Q
 
 
 def about(request):
@@ -315,12 +316,17 @@ def rating(request, item_id: str, is_like: str):
     return redirect(reverse("product_detail", args=(item_id,)))
 
 
+@login_required
 def chat(request):
-    _rooms = models.Room.objects.all()[::-1]
+    current_user = request.user
+    _rooms = models.Room.objects.filter(
+        Q(name=current_user.username) | Q(messages__user=current_user)
+    ).distinct()
+
     return render(
         request,
         "ChatPage.html",
-        context={"rooms": _rooms, "current_user": request.user},
+        context={"rooms": _rooms, "current_user": current_user},
     )
 
 
@@ -335,6 +341,7 @@ def room(request, room_slug: str, token: str):
     return render(
         request, "RoomPage.html", context={"room": _room, "messages": _messages}
     )
+
 
 @csrf_exempt
 def create_chat_room(request):
