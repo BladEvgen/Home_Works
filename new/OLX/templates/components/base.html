@@ -39,6 +39,10 @@
               <a href="{% url 'chat' %}" class="btn btn-outline-none text-primary">
                 <i class="fas fa-comments"></i> Open Chat Rooms
               </a>
+              {%else%}
+              <a href="#" style="display: none;" class="btn btn-outline-none text-primary">
+                  <i class="fas fa-comments"></i> Open Chat Rooms
+              </a>
             {% endif %}
           <button
             class="navbar-toggler"
