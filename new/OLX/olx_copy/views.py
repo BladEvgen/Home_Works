@@ -77,8 +77,6 @@ def register(request):
             password=password,
         )
 
-        models.UserProfile.objects.create(user=user)
-
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
