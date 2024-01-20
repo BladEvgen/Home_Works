@@ -77,6 +77,8 @@ def register(request):
             password=password,
         )
 
+        models.UserProfile.objects.create(user=user)
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
@@ -113,7 +115,9 @@ def login_view(request):
 @decorator_error_handler
 @login_required
 def profile(request, username):
-    user_profile = get_object_or_404(models.UserProfile, user__username=username)
+    user = get_object_or_404(User, username=username)
+
+    user_profile, created = models.UserProfile.objects.get_or_create(user=user)
 
     selected_language = request.COOKIES.get("selected_language", "ENG")
     activate(selected_language)
@@ -185,6 +189,8 @@ def create_item(request):
             )
 
             messages.success(request, "Item created successfully.")
+
+            return redirect("product_detail", product_id=item.id)
 
         except models.CategoryItem.DoesNotExist:
             messages.error(request, "Selected Category does not exist.")
@@ -316,17 +322,40 @@ def rating(request, item_id: str, is_like: str):
     return redirect(reverse("product_detail", args=(item_id,)))
 
 
-@login_required
 def chat(request):
-    current_user = request.user
-    _rooms = models.Room.objects.filter(
-        Q(name=current_user.username) | Q(messages__user=current_user)
-    ).distinct()
+    user_rooms = (
+        models.Room.objects.filter(
+            Q(user_started=request.user) | Q(user_opponent=request.user)
+        )
+        .distinct()
+        .order_by("-created_at")
+    )
+
+    room_data = []
+    for room in user_rooms:
+        opponent_username = (
+            room.user_opponent.username
+            if request.user == room.user_started
+            else room.user_started.username
+        )
+        room_data.append(
+            {
+                "room": room,
+                "opponent_username": opponent_username,
+            }
+        )
+
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
 
     return render(
         request,
         "ChatPage.html",
-        context={"rooms": _rooms, "current_user": current_user},
+        context={
+            "room_data": room_data,
+            "current_user": request.user,
+            "selected_language": selected_language,
+        },
     )
 
 
@@ -337,9 +366,17 @@ def room(request, room_slug: str, token: str):
     if not _room.is_valid_token(token):
         return HttpResponseForbidden("Invalid token for this room")
 
-    _messages = models.Message.objects.filter(room=_room)[:30][::-1]
+    _messages = models.Message.objects.filter(room=_room)[::-1]
+    selected_language = request.COOKIES.get("selected_language", "ENG")
+    activate(selected_language)
     return render(
-        request, "RoomPage.html", context={"room": _room, "messages": _messages}
+        request,
+        "RoomPage.html",
+        context={
+            "room": _room,
+            "messages": _messages,
+            "selected_language": selected_language,
+        },
     )
 
 
@@ -355,8 +392,11 @@ def create_chat_room(request):
                 print(f"Item with ID {item_id} not found")
                 return JsonResponse({"success": False, "error": "Item not found"})
 
+            user_opponent = item.author
+
             existing_room = models.Room.objects.filter(
-                name=request.user.username, item=item
+                Q(user_started=request.user, user_opponent=user_opponent, item=item)
+                | Q(user_opponent=request.user, user_started=user_opponent, item=item)
             ).first()
 
             print(f"\nItem ID: {item_id} \nExisting Room: {existing_room}\n")
@@ -365,7 +405,9 @@ def create_chat_room(request):
                 room_slug = existing_room.slug
                 room_token = existing_room.token
             else:
-                room = models.Room(name=request.user.username, item=item)
+                room = models.Room(
+                    user_started=request.user, user_opponent=user_opponent, item=item
+                )
                 room.save()
                 room_slug = room.slug
                 room_token = room.token
