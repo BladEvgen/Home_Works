@@ -11,6 +11,8 @@ from django.utils.text import slugify
 
 def user_avatar_path(instance, filename):
     username = instance.user.username
+    if filename == "user.png":
+        return f"user_images/{username}/avatar_{username}_{filename}"
     return f"user_images/{username}/avatar_{username}.{filename.split('.')[-1]}"
 
 
@@ -23,24 +25,18 @@ class UserProfile(models.Model):
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else None
 
-    def save(self, *args, **kwargs):
-        if self.pk:
-            old_avatar = UserProfile.objects.get(pk=self.pk).avatar
-            if old_avatar and self.avatar != old_avatar:
-                if (
-                    os.path.isfile(old_avatar.path)
-                    and old_avatar.path != "png/user.png"
-                ):
-                    os.remove(old_avatar.path)
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.user.username} Profile"
 
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    UserProfile.objects.get_or_create(user=instance)
+    if created:
+        UserProfile.objects.create(user=instance)
+    else:
+        if instance.userprofile.avatar.name != "user.png":
+            instance.userprofile.avatar.delete(save=False)
+        instance.userprofile.save()
 
 
 class CategoryItem(models.Model):
@@ -249,9 +245,35 @@ class Room(models.Model):
         default=uuid.uuid4,
     )
 
+    user_started = models.ForeignKey(
+        User,
+        verbose_name="Вопрощатель",
+        related_name="rooms_started",
+        on_delete=models.CASCADE,
+    )
+
+    user_opponent = models.ForeignKey(
+        User,
+        verbose_name="Ответчик",
+        related_name="rooms_opponent",
+        on_delete=models.CASCADE,
+    )
+
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
+    created_at = models.DateTimeField(
+        verbose_name="Дата Создания",
+        editable=False,
+        default=timezone.now,
+    )
     objects = RoomManager()
+
+    def get_opponent_username(self, user):
+        return (
+            self.user_opponent.username
+            if user == self.user_started
+            else self.user_started.username
+        )
 
     def is_valid_token(self, provided_token):
         return self.token == provided_token
@@ -304,7 +326,7 @@ class Message(models.Model):
         db_index=False,
         unique=False,
         editable=True,
-        blank=True,
+        blank=False,
         null=False,
     )
     date_added = models.DateTimeField(
