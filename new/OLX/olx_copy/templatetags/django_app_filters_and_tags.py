@@ -81,7 +81,7 @@ def formatted_time(time):
     if language == "en":
         return formats.date_format(time, "M d Y g:i A")
     elif language == "ru":
-        return time.strftime("%d.%m.%Y %H:%M")
+        return time.strftime("%H:%M %d.%m.%Y ")
     else:
         # ENG AS DEFAULT
         return formats.date_format(time, "M d Y g:i A")
