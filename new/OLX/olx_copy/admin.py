@@ -18,7 +18,6 @@ admin.site.site_header = "Панель управления"
 admin.site.index_title = "Администрирование сайта"
 admin.site.site_title = "Администрирование"
 
-# Register your models here.
 exclude_models = [RoomManager]
 
 for model in apps.get_models():
