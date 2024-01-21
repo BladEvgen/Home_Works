@@ -40,7 +40,10 @@ def home(request):
     categories = models.CategoryItem.objects.all()
     vips = (
         models.Vip.objects.all()
-        .filter(expired__gt=datetime.datetime.now())
+        .filter(
+            expired__gt=datetime.datetime.now(),
+            article__is_active=True,
+        )
         .order_by("priority", "-article")
     )
     selected_language = request.COOKIES.get("selected_language", "ENG")
@@ -128,6 +131,13 @@ def profile(request, username):
 
 
 @login_required
+def user_items(request):
+    items = models.Item.objects.filter(author=request.user)
+
+    return render(request, "user_items.html", {"items": items})
+
+
+@login_required
 def change_data(request, username):
     user_profile = get_object_or_404(models.UserProfile, user=request.user)
 
@@ -144,11 +154,14 @@ def change_data(request, username):
         avatar = request.FILES.get("avatar")
         if avatar:
             old_avatar = user_profile.avatar
-            if old_avatar:
-                if os.path.isfile(old_avatar.path):
+
+            if old_avatar and os.path.basename(old_avatar.name) == "user.png":
+                pass
+            else:
+                if old_avatar and os.path.isfile(old_avatar.path):
                     os.remove(old_avatar.path)
 
-            user_profile.avatar = avatar
+                user_profile.avatar = avatar
 
         user_profile.save()
         return HttpResponseRedirect(reverse("profile", args=[username]))
@@ -195,6 +208,51 @@ def create_item(request):
 
     categories = models.CategoryItem.objects.all()
     return render(request, "create_product.html", context={"categories": categories})
+
+
+@login_required
+def modify_item(request, item_id):
+    item = get_object_or_404(models.Item, id=item_id)
+    categories = models.CategoryItem.objects.all()
+    tags = models.TagItem.objects.all()
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        original_price = request.POST.get("original_price")
+        discounted_price = request.POST.get("discounted_price")
+        category_id = request.POST.get("category")
+        tags_ids = request.POST.getlist("tags")
+        is_active = True if request.POST.get("is_active", None) else False
+
+        item.title = title
+        item.price = int(original_price)
+        item.discounted_price = (
+            int(discounted_price)
+            if discounted_price and discounted_price.strip()
+            else None
+        )
+        item.category = models.CategoryItem.objects.get(id=category_id)
+        item.tags.set(models.TagItem.objects.filter(id__in=tags_ids))
+        item.is_active = is_active
+
+        new_image = request.FILES.get("image")
+        if new_image:
+            if item.image.name != "nodatafound.png":
+                default_storage.delete(item.image.name)
+
+            image_extension = new_image.name.split(".")[-1]
+            new_image_name = f"{item.title.replace(' ', '_')}.{image_extension}"
+            item.image.save(new_image_name, new_image)
+
+        item.save()
+
+        return redirect(reverse("product_detail", args=[item.id]))
+
+    return render(
+        request,
+        "modify_item.html",
+        {"item": item, "categories": categories, "tags": tags},
+    )
 
 
 @decorator_error_handler
@@ -328,7 +386,7 @@ def chat(request):
 
     if sort == "asc":
         user_rooms = user_rooms.order_by("created_at")
-    else:  
+    else:
         user_rooms = user_rooms.order_by("-created_at")
 
     room_data = []
@@ -355,7 +413,7 @@ def chat(request):
             "room_data": room_data,
             "current_user": request.user,
             "selected_language": selected_language,
-            "sort": sort,  
+            "sort": sort,
         },
     )
 
