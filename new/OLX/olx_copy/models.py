@@ -11,15 +11,15 @@ from django.utils.text import slugify
 
 def user_avatar_path(instance, filename):
     username = instance.user.username
-    if filename == "user.png":
-        return f"user_images/{username}/avatar_{username}_{filename}"
     return f"user_images/{username}/avatar_{username}.{filename.split('.')[-1]}"
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(
-        upload_to=user_avatar_path, null=True, blank=True, default="static/media/png/user.png"
+        upload_to=user_avatar_path,
+        null=True,
+        blank=True,
     )
 
     def get_avatar_url(self):
