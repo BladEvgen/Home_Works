@@ -20,6 +20,8 @@ urlpatterns = [
     path(
         "product_detail/<int:product_id>/", views.product_detail, name="product_detail"
     ),
+    path("modify_item/<int:item_id>/", views.modify_item, name="modify_item"),
+    path("user_items/", views.user_items, name="user_items"),
     path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
     path("profile/<str:username>/change_data/", views.change_data, name="change_data"),
     path("delete_review/<int:product_id>/", views.delete_review, name="delete_review"),
