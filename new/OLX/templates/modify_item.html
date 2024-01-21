@@ -1,4 +1,4 @@
-{% extends "components/base.html" %} {% block title %} Home {% endblock title %}
+{% extends "components/base.html" %} {% block title %} Update Item {% endblock title %}
 {% load django_app_filters_and_tags %} 
 {% load static %}
 {% block main %}
@@ -6,7 +6,7 @@
 
 </style>
 <div class="container mt-5">
-  <h2 class="mb-4">Update Profile</h2>
+  <h2 class="mb-4">Update Item</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     
@@ -19,7 +19,7 @@
       <label for="avatar" class="form-label">Picture Preview:</label>
       <div class="d-flex align-items-center justify-content-center mb-3">
         {% if item.image %}
-            <img id="avatar-preview" class="img-fluid img-thumbnail" src="{% item_image_url item %}" alt="{{ item.name }}">
+            <img id="avatar-preview" class="img-fluid img-thumbnail" src="{% item_image_url item %}" alt="{{ item.name }}" style="max-width:30%;">
         {% else %}
             <img id="avatar-preview" class="img-fluid img-thumbnail" src="{% static 'media/png/nodatafound.png' %}" alt="no data found" width="50">
         {% endif %}
