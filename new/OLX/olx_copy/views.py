@@ -321,13 +321,15 @@ def rating(request, item_id: str, is_like: str):
 
 
 def chat(request):
-    user_rooms = (
-        models.Room.objects.filter(
-            Q(user_started=request.user) | Q(user_opponent=request.user)
-        )
-        .distinct()
-        .order_by("-created_at")
-    )
+    sort = request.GET.get("sort", "desc")
+    user_rooms = models.Room.objects.filter(
+        Q(user_started=request.user) | Q(user_opponent=request.user)
+    ).distinct()
+
+    if sort == "asc":
+        user_rooms = user_rooms.order_by("created_at")
+    else:  
+        user_rooms = user_rooms.order_by("-created_at")
 
     room_data = []
     for room in user_rooms:
@@ -353,6 +355,7 @@ def chat(request):
             "room_data": room_data,
             "current_user": request.user,
             "selected_language": selected_language,
+            "sort": sort,  
         },
     )
 
