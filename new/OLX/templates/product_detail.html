@@ -4,7 +4,14 @@
 {% block title %}Product Detail{% endblock title %}
 {% block main %}
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">{{ product.title }}</h2>
+    
+    <h2 class="mb-4 text-center">{{ product.title }}           
+        {%if request.user == product.author%}
+                <a href="{%url 'modify_item' product.id%}" id="changeColor" class="text-warning">
+                    <i class="fas fa-wrench me-2" style="cursor: pointer; font-size: 1.5em;"></i>
+                </a>
+            {%endif%}
+        </h2> 
         <div class="text-center">
             <img src="{% item_image_url product %}" alt="{{ product.title }}" class="img-fluid" style="max-width: 450; max-height: 450px;">
         </div>
@@ -146,4 +153,6 @@
     }
 </script>
 {% include "components/paginator.html" %}
+<script src="{% static 'js/edit_profile_button.js' %}"></script>
+
 {% endblock main %}
