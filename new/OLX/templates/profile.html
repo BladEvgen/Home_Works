@@ -22,7 +22,7 @@
     <div class="card">
                 <div class="p-3 avatar-preview-container">
                    {% if user.userprofile.get_avatar_url %}
-                    <img src="{{ user.userprofile.get_avatar_url }}?{{ user.userprofile.avatar.timestamp }}" class="avatar-preview rounded-circle" alt="User Avatar">
+                    <img src="{{ user.userprofile.get_avatar_url }}" class="avatar-preview rounded-circle" alt="User Avatar">
                     {% else %}
                     <img src="{% static 'media/png/user.png' %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
                     {% endif %} 
