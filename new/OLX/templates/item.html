@@ -9,7 +9,7 @@
     }
 </style>
 <div class="container mt-4">
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
         {% for item in items %}
             <div class="col">
                 <a href="{%url "product_detail" item.id %}" class="card text-decoration-none">
@@ -19,7 +19,7 @@
                         </div>
 
                         <h5 class="card-title">{{ item.title|custom_cut:25 }}</h5>
-                        <p class="card-text text-muted">{{ item.description|custom_cut:50 }}</p>
+                        <p class="card-text text-muted">{{ item.description|custom_cut:44 }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             {% if item.discounted_price %}
                                 <span class="text-danger">{% digit_beautify item.discounted_price %} ₸</span>
