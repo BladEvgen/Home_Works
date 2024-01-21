@@ -21,7 +21,11 @@
                 <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}" class="h-auto w-24 transition-all duration-300 rounded-lg">
                     <div class="flex flex-col gap-y-2">
                         <span>{{room.item.title}}</span>
-                        <span>{{room.item.price}}</span>
+                        {%if room.item.discounted_price%}
+                        <span>{% digit_beautify  room.item.discounted_price %}₸ </span>
+                        {%else%}
+                        <span>{% digit_beautify  room.item.price %}₸ </span>
+                        {%endif%}
                     </div>
             </div>
         </div>
