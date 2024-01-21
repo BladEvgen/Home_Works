@@ -19,7 +19,7 @@ def user_avatar_path(instance, filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(
-        upload_to=user_avatar_path, null=True, blank=True
+        upload_to=user_avatar_path, null=True, blank=True, default="static/media/png/user.png"
     )
 
     def get_avatar_url(self):
@@ -31,12 +31,7 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.get_or_create(user=instance)
-    else:
-        if instance.userprofile.avatar.name != "user.png":
-            instance.userprofile.avatar.delete(save=False)
-        instance.userprofile.save()
+    UserProfile.objects.get_or_create(user=instance)
 
 
 class CategoryItem(models.Model):
