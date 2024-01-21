@@ -7,6 +7,9 @@ from django.shortcuts import render
 DB_PATH = Path(__file__).resolve().parent.parent / "database" / "database.db"
 LOGS_PATH = Path(__file__).resolve().parent.parent / "log"
 
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+LOGS_PATH.mkdir(parents=True, exist_ok=True)
+
 
 class Database:
     def __init__(self, database_path: str):
