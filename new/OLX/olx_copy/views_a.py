@@ -43,6 +43,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = data["username"]
         room = data["room"]
         message = data["message"]
+        avafiruser = data.get("avafiruser","")
+        avasecuser = data.get("avasecuser","")
+        firusername = data.get("firusername","")
+        secusername = data.get("secusername","")
 
         await self.save_message(username, room, message)
 
@@ -53,6 +57,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message": message,
                 "username": username,
                 "room": room,
+                "avafiruser": avafiruser,
+                "avasecuser": avasecuser,
+                "firusername": firusername,
+                "secusername": secusername,
             },
         )
 
@@ -62,12 +70,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = event["username"]
         room = event["room"]
 
+        avafiruser = event["avafiruser"]
+        avasecuser = event["avasecuser"]
+        firusername = event["firusername"]
+        secusername = event["secusername"]
+
         await self.send(
             text_data=json.dumps(
                 {
                     "message": message,
                     "username": username,
                     "room": room,
+                    "avafiruser": avafiruser,
+                    "avasecuser": avasecuser,
+                    "firusername": firusername,
+                    "secusername": secusername,
                 }
             )
         )

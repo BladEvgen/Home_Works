@@ -6,6 +6,13 @@ const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + 
 const messageInputDom = document.querySelector('#chat-message-input');
 const messageSubmitButton = document.querySelector('#chat-message-submit');
 
+let dataMessages = {
+    avafiruser: '',
+    avasecuser: '',
+    firusername: '',
+    secusername: '',
+}
+
 messageInputDom.addEventListener('input', function() {
     const message = messageInputDom.value.trim();
     messageSubmitButton.disabled = message === '';
@@ -15,19 +22,18 @@ chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('Message received:', data);
 
-    // Check if the message is not empty before processing
     if (data.message && data.message.trim() !== '') {
-        let html = '<div class="flex mb-2">'; // Default for messages with content
-        if (data.username === userName) {
-            html = '<div class="flex justify-end mb-2">';
-            html += '<div class="bg-sky-500 text-black p-4 rounded-xl">';
-        } else {
-            html = '<div class="flex mb-2">';
-            html += '<div class="bg-gray-200 text-black p-4 rounded-xl">';       
-        }
-        html += '<p class="font-semibold">' + data.username + '</p>';
-        html += '<p>' + data.message + '</p></div></div>';
-        document.querySelector('#chat-messages').innerHTML += html;
+
+        const htmlRaw = `<div class="flex ${(data.firusername == data.secusername) ? 'flex-row-reverse' : 'flex-row'} gap-x-2">
+            <img src="${(data.firusername == data.secusername) ? data.avafiruser : data.avasecuser }" alt="IMG" class="w-10 h-10 rounded-full">
+            <div class="flex flex-col rounded-xl gap-y-2 p-2 ${(data.firusername == data.secusername) ? 'bg-violet-300' : 'bg-gray-200'}">
+                <div class="flex flex-row gap-x-3">
+                    <span class="font-bold">${data.username}</span>
+                </div>
+                <span>${data.message}</span>
+            </div>
+        </div>`;
+        document.querySelector('#chat-messages').innerHTML += htmlRaw;
         scrollToBottom();
     }
 };
@@ -36,6 +42,8 @@ chatSocket.onclose = function(e) {
     console.log("WebSocket closed:", e);  
     console.log("Bye!");
 };
+
+
 
 document.querySelector('#chat-message-submit').onclick = sendMessage;
 
@@ -53,7 +61,11 @@ function sendMessage() {
         chatSocket.send(JSON.stringify({
             'message': message,
             'username': userName,
-            'room': roomName
+            'room': roomName,
+            'avafiruser': dataMessages["avafiruser"],
+            'avasecuser': dataMessages["avasecuser"],
+            'firusername': dataMessages["firusername"],
+            'secusername': dataMessages["secusername"],
         }));
     }
 
@@ -69,4 +81,6 @@ function scrollToBottom() {
 
 window.onload = function() {
     scrollToBottom();
+    const dataMessagesElem = document.getElementById("chat-messages");
+    dataMessages = dataMessagesElem.dataset;
 };
