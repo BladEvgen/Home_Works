@@ -28,11 +28,67 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} Profile"
 
+    def check_access(self, action_slug: str = ""):
+        try:
+            user: User = self.user
+            action: Action = Action.objects.get(slug=action_slug)
+            intersections = GroupExtend.objects.filter(users=user, actions=action)
+            if len(intersections) > 0:
+                return True
+            return False
+        except Exception as error:
+            print("error check_access: ", error)
+            return False
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     UserProfile.objects.get_or_create(user=instance)
 
+
+class Action(models.Model):
+    slug = models.SlugField(
+        verbose_name="Ссылка",
+        max_length=500,
+        unique=True,
+    )
+    description = models.TextField(
+        verbose_name="Описание",
+        default="",
+    )
+
+    class Meta:
+        app_label = "auth"
+        ordering = ("slug",)
+        verbose_name = "Действие"
+        verbose_name_plural = "Действия"
+
+    def __str__(self):
+        return f"Action: {self.slug} - {self.description[:50]}"
+
+class GroupExtend(models.Model):
+    name = models.CharField(
+        verbose_name="Название группы",
+        max_length=300,
+        unique=True,
+    )
+    users = models.ManyToManyField(
+        verbose_name="Пользователи принадлежащие к группе",
+        to=User,
+    )
+    actions = models.ManyToManyField(
+        verbose_name="Возможности доступные этой группе",
+        to=Action,
+    )
+
+    class Meta:
+        app_label = "auth"
+        ordering = ("name",)
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+
+    def __str__(self):
+        return f"Group: {self.name}"
 
 class CategoryItem(models.Model):
     title = models.CharField(

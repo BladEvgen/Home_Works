@@ -3,6 +3,7 @@ from django.utils.timesince import timesince
 from django.utils import timezone
 from django.utils.translation import get_language
 from django.utils import formats
+from olx_copy import models
 
 register = template.Library()
 
@@ -85,3 +86,13 @@ def formatted_time(time):
     else:
         # ENG AS DEFAULT
         return formats.date_format(time, "M d Y g:i A")
+
+
+@register.simple_tag(takes_context=True)
+def check_access(context: dict, action_slug: str = "") -> bool:
+    user: models.User = context["request"].user
+    if not user.is_authenticated:
+        return False
+    profile: models.UserProfile = user.UserProfile
+    is_access: bool = profile.check_access(action_slug)
+    return is_access
