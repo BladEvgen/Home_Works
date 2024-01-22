@@ -1,11 +1,12 @@
 {% extends "components/base.html" %}
 {% load static %}
 {% load django_app_filters_and_tags %}
-{% block title %}Chat with{% endblock title %}
+{% block title %}Chat{% endblock title %}
 {% block main %}
 <script src="https://cdn.tailwindcss.com"></script>
 <div class="overflow-x-hidden ">
     <div class="flex-grow flex flex-col items-center justify-center">
+
         <div class="p-4 lg:p-10 text-center">
             <div class="p-4 lg:p-10 text-center">
                 {% if room.name %}
@@ -17,18 +18,15 @@
                     <h1 class="text-3xl lg:text-6xl text-dark">Messaging with {{ room.user_started.username|title }}</h1>
                 {% endif %}
             </div>
-            <div class="flex flex-row items-center mx-3 mb-2 bg-gray-100 p-3 gap-x-3">
-                <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}" class="h-auto w-24 transition-all duration-300 rounded-lg">
-                    <div class="flex flex-col gap-y-2">
-                        <span>{{room.item.title}}</span>
-                        {%if room.item.discounted_price%}
-                        <span>{% digit_beautify  room.item.discounted_price %}₸ </span>
-                        {%else%}
-                        <span>{% digit_beautify  room.item.price %}₸ </span>
-                        {%endif%}
-                    </div>
+            <div class="flex items-center justify-center mt-4">
+                <div class="flex items-center">
+                    <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}" class="h-16 w-16 rounded-lg cursor-pointer">
+                    <h3 class="ml-4 text-lg text-dark">{{room.item.title}}</h3>
+                </div>
             </div>
         </div>
+
+
 
 
         <div class="w-full md:w-1/2 lg:w-2/3 mt-6 mx-4 lg:mx-auto p-4 bg-white rounded-xl shadow-md">
