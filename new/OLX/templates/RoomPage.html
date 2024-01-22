@@ -37,7 +37,6 @@
                             <div class="bg-sky-500 text-black p-4 rounded-xl">
                                 <p class="font-semibold">{{ message.user.username }}</p>
                                 <p>{{ message.content }}</p>
-                                <p> {%formatted_time message.date_added%} </p>
 
                             </div>
                         </div>
@@ -46,7 +45,6 @@
                             <div class="bg-gray-200 text-black p-4 rounded-xl">
                                 <p class="font-semibold">{{ message.user.username }}</p>
                                 <p>{{ message.content }}</p>
-                                <p> {%formatted_time message.date_added%} </p>
                             </div>
                         </div>
                     {% endif %}
