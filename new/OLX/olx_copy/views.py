@@ -11,6 +11,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import (
+    TemplateView,
+    View,
+    ListView,
+    DetailView,
+    DeleteView,
+    CreateView,
+)
 from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -19,6 +27,10 @@ from django.utils.translation import activate
 from olx_copy.utils import decorator_error_handler
 from olx_copy import models
 from django.db.models import Q
+
+
+class AboutView(TemplateView):
+    template_name = "about.html"
 
 
 def about(request):
@@ -32,7 +44,9 @@ def search(request):
         _items = models.Item.objects.all().filter(
             is_active=True, title__icontains=_search
         )
-        return render(request, "item.html", context={"items": _items})
+        return render(
+            request, "item.html", context={"items": _items, "search": _search}
+        )
 
 
 @decorator_error_handler
@@ -113,21 +127,39 @@ def login_view(request):
     return render(request, "login.html", context={})
 
 
-@decorator_error_handler
-@login_required
-def profile(request, username):
-    user = get_object_or_404(User, username=username)
+class ProfileView(View):
+    template_name = "profile.html"
 
-    user_profile, created = models.UserProfile.objects.get_or_create(user=user)
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        user_profile, created = models.UserProfile.objects.get_or_create(user=user)
 
-    selected_language = request.COOKIES.get("selected_language", "ENG")
-    activate(selected_language)
+        selected_language = request.COOKIES.get("selected_language", "ENG")
+        activate(selected_language)
 
-    return render(
-        request,
-        "profile.html",
-        context={"user_profile": user_profile, "selected_language": selected_language},
-    )
+        return render(
+            request,
+            template_name=self.template_name,
+            context={
+                "user_profile": user_profile,
+                "selected_language": selected_language,
+            },
+        )
+
+    def post(self, request, username):
+        user = get_object_or_404(User, username=username)
+        user_profile, created = models.UserProfile.objects.get_or_create(user=user)
+
+        avatar = request.FILES.get("avatar", None)
+        if avatar:
+            user_profile.avatar = avatar
+            user_profile.save()
+
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"user_profile": user_profile},
+        )
 
 
 @login_required
@@ -486,3 +518,40 @@ def create_chat_room(request):
     except Exception as e:
         print("Exception in create_chat_room:", str(e))
         return JsonResponse({"success": False, "error": str(e)})
+
+
+def check_access_slug(slug: str, redirect_url: str = "home"):
+    """Параметризируемый декоратор - конструктор декоратора"""
+
+    def check_access(func):
+        def wrapper(*args, **kwargs):
+            user: User = args[0].user
+            if not user.is_authenticated:
+                return redirect(reverse(redirect_url))
+            profile: models.Profile = user.profile
+            is_access: bool = profile.check_access(slug)
+            if not is_access:
+                return redirect(reverse(redirect_url))
+            # TODO VIEW
+            res = func(*args, **kwargs)
+            return res
+
+        return wrapper
+
+    return check_access
+
+
+@check_access_slug(slug="UsersModeratePage_view")
+def moderate_users(request):
+    users = User.objects.all()
+    return render(request, "ModerateUsers.html", context={"users": users})
+
+
+@check_access_slug(slug="UsersModeratePage_ban")
+def moderate_ban_users(request):
+    return render(request, "ModerateUsers.html")
+
+
+@check_access_slug(slug="UsersModeratePage_delete")
+def moderate_delete_users(request):
+    return render(request, "ModerateUsers.html")
