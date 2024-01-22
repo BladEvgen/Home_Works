@@ -5,6 +5,7 @@ from olx_copy import views
 from olx_copy import views_a
 
 urlpatterns = [
+    # * Home and User Authentication
     path("", views.home, name=""),
     path("home/", views.home, name="home"),
     path("index/", views.home, name="home"),
@@ -12,8 +13,9 @@ urlpatterns = [
     path("register/", views.register, name="register"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
-    # path("profile/<str:username>/", views.profile, name="profile"),
+    # * User Profile
     path("profile/<str:username>/", views.ProfileView.as_view(), name="profile"),
+    # * Item-related URLs
     path("item/<str:item_slug>/", views.item, name="item"),
     path("create_item/", views.create_item, name="create_item"),
     path("search/", views.search, name="search"),
@@ -26,15 +28,16 @@ urlpatterns = [
     path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
     path("profile/<str:username>/change_data/", views.change_data, name="change_data"),
     path("delete_review/<int:product_id>/", views.delete_review, name="delete_review"),
-    # TODO CHAT WITH TOKEN
+    # ! CHAT WITH TOKEN
     path("chat/", views.chat, name="chat"),
     path("chat/<slug:room_slug>/<str:token>/", views.room, name="room"),
     path("create_chat_room/", views.create_chat_room, name="create_chat_room"),
+    # * MODERATE
+    path("moderate/users/", views.moderate_users, name="moderate_users"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 websocket_urlpatterns = [
     path("ws/chat/<slug:room_name>/", views_a.ChatConsumer.as_asgi())
