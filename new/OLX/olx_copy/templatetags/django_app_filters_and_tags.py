@@ -93,6 +93,6 @@ def check_access(context: dict, action_slug: str = "") -> bool:
     user: models.User = context["request"].user
     if not user.is_authenticated:
         return False
-    profile: models.UserProfile = user.UserProfile
+    profile: models.UserProfile = user.profile
     is_access: bool = profile.check_access(action_slug)
     return is_access
