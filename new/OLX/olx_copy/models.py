@@ -15,7 +15,7 @@ def user_avatar_path(instance, filename):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.ImageField(
         upload_to=user_avatar_path,
         null=True,
@@ -66,6 +66,7 @@ class Action(models.Model):
     def __str__(self):
         return f"Action: {self.slug} - {self.description[:50]}"
 
+
 class GroupExtend(models.Model):
     name = models.CharField(
         verbose_name="Название группы",
@@ -89,6 +90,7 @@ class GroupExtend(models.Model):
 
     def __str__(self):
         return f"Group: {self.name}"
+
 
 class CategoryItem(models.Model):
     title = models.CharField(
