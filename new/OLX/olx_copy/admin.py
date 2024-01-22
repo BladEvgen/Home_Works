@@ -12,6 +12,8 @@ from .models import (
     Room,
     Message,
     RoomManager,
+    Action,
+    GroupExtend
 )
 
 admin.site.site_header = "Панель управления"
