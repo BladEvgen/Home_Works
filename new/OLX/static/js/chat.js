@@ -2,7 +2,6 @@ const roomName = JSON.parse(document.getElementById('json-roomname').textContent
 const userName = JSON.parse(document.getElementById('json-username').textContent);
 const Token = JSON.parse(document.getElementById('json-token').textContent);
 const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/?token=' + Token);
-
 const messageInputDom = document.querySelector('#chat-message-input');
 const messageSubmitButton = document.querySelector('#chat-message-submit');
 

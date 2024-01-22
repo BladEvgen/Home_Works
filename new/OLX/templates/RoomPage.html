@@ -1,113 +1,70 @@
 {% extends "components/base.html" %}
 {% load static %}
 {% load django_app_filters_and_tags %}
-{% block title %}Chat{% endblock title %}
+{% block title %}Chat with{% endblock title %}
 {% block main %}
 <script src="https://cdn.tailwindcss.com"></script>
-<div class="overflow-x-hidden ">
-    <div class="flex-grow flex flex-col items-center justify-center">
-
-        <div class="p-4 lg:p-10 text-center">
-            <div class="p-4 lg:p-10 text-center">
-                {% if room.name %}
-                    <h1 class="text-3xl lg:text-6xl text-dark">Room name {{ room.name|title }}</h1>
-                {% endif %}
+<div
+    class="w-full md:w-2/3 lg:w-3/4 overflow-hidden flex flex-col m-auto border border-solid border-gray-100 rounded-xl shadow-lg my-3">
+    <div class="flex flex-row items-center mx-3 my-1 bg-gray-100 rounded-t-2xl p-3 gap-x-3">
+        <span class="text-2xl"><a href="{ %url% 'product_detail' room.item.id }"> < </a>
+             </span>
                 {% if request.user == room.user_started %}
-                    <h1 class="text-3xl lg:text-6xl text-dark">Messaging with {{ room.user_opponent.username|title }}</h1>
+                <img src="{{ room.user_opponent.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
                 {% else %}
-                    <h1 class="text-3xl lg:text-6xl text-dark">Messaging with {{ room.user_started.username|title }}</h1>
+                <img src="{{ room.user_started.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
                 {% endif %}
-            </div>
-            <div class="flex items-center justify-center mt-4">
-                <div class="flex items-center">
-                    <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}" class="h-16 w-16 rounded-lg cursor-pointer">
-                    <h3 class="ml-4 text-lg text-dark">{{room.item.title}}</h3>
-                </div>
-            </div>
-        </div>
 
-
-
-
-        <div class="w-full md:w-1/2 lg:w-2/3 mt-6 mx-4 lg:mx-auto p-4 bg-white rounded-xl shadow-md">
-            <div class="chat-messages h-64 overflow-y-auto  space-y-3" id="chat-messages">
-                {% for message in messages %}
-                    {% if message.user == request.user %}
-                        <div class="flex justify-end mb-2">
-                            <div class="bg-sky-500 text-black p-4 rounded-xl">
-                                <p class="font-semibold">{{ message.user.username }}</p>
-                                <p>{{ message.content }}</p>
-
-                            </div>
-                        </div>
+                <span class="font-bold text-3xl">
+                    {% if request.user == room.user_started %}
+                    {{ room.user_opponent.username|title }}
                     {% else %}
-                        <div class="flex mb-2">
-                            <div class="bg-gray-200 text-black p-4 rounded-xl">
-                                <p class="font-semibold">{{ message.user.username }}</p>
-                                <p>{{ message.content }}</p>
-                            </div>
-                        </div>
+                    {{ room.user_started.username|title }}
                     {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="lg:w-2/3 mt-6 mx-4 lg:mx-auto p-4 bg-white rounded-xl shadow-md">
-        <form class="flex flex-col md:flex-row">
-            {% csrf_token %}
-            <textarea name="content" class="flex-1 md:mr-3 p-3 border rounded-xl focus:outline-none focus:border-teal-500 h-auto resize-none" placeholder="Your message..." id="chat-message-input" required></textarea>
-            <button class="md:px-5 py-3 rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none" id="chat-message-submit">Send</button>
-        </form>
-
-
-        </div>
-    </div>
-        <span class="font-bold text-3xl">
-            {% if request.user == room.user_started %}
-                {{ room.user_opponent.username|title }}
-            {% else %}
-                {{ room.user_started.username|title }}
-            {% endif %}
-        </span>
+                </span>
     </div>
 
     <div class="flex flex-row items-center mx-3 mb-2 bg-gray-100 p-3 gap-x-3">
-        <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}" class="h-auto w-24 transition-all duration-300 rounded-lg cursor-pointer filter grayscale hover:grayscale-0">
+        <img src="{% item_image_url room.item %}" alt="{{ room.item.title }}"
+            class="h-auto w-24 transition-all duration-300 rounded-lg cursor-pointer filter grayscale hover:grayscale-0">
         <div class="flex flex-col gap-y-2">
             <span>{{room.item.title}}</span>
             {%if room.item.discounted_price%}
-                <span>{{room.item.discounted_price}} <i class="fa-solid fa-tenge-sign"></i></span>
+            <span>{{room.item.discounted_price}} <i class="fa-solid fa-tenge-sign"></i></span>
             {%else%}
-                <span>{{room.item.price}} <i class="fa-solid fa-tenge-sign"></i></span>
+            <span>{{room.item.price}} <i class="fa-solid fa-tenge-sign"></i></span>
             {%endif%}
         </div>
     </div>
 
     <div class="h-[50vh] flex flex-col gap-y-3 mx-3 overflow-y-auto" id="chat-messages"
         data-avafiruser="{{ room.user_started.userprofile.get_avatar_url }}"
-        data-avasecuser="{{ room.user_opponent.userprofile.get_avatar_url }}"
-        data-firusername="{{ messages.0.user }}"
+        data-avasecuser="{{ room.user_opponent.userprofile.get_avatar_url }}" data-firusername="{{ messages.0.user }}"
         data-secusername="{{ request.user }}">
-        
-        {% for message in messages %}
-            <div class="flex {% if message.user == request.user %}flex-row-reverse{% else %}flex-row{% endif %} gap-x-2">
-                <img src="{{ message.user.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
 
-                <div class="flex flex-col rounded-xl gap-y-2 p-2 {% if message.user == request.user %}bg-violet-300{% else %}bg-gray-200{% endif %}">
-                    <div class="flex flex-row gap-x-3">
-                        <span class="font-bold">{{ message.user.username }}</span>
-                    </div>
-                    <span>{{ message.content }}</span>
+        {% for message in messages %}
+        <div class="flex {% if message.user == request.user %}flex-row-reverse{% else %}flex-row{% endif %} gap-x-2">
+            <img src="{{ message.user.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
+
+            <div
+                class="flex flex-col rounded-xl gap-y-2 p-2 {% if message.user == request.user %}bg-violet-300{% else %}bg-gray-200{% endif %}">
+                <div class="flex flex-row gap-x-3">
+                    <span class="font-bold">{{ message.user.username }}</span>
                 </div>
+                <span>{{ message.content }}</span>
             </div>
+        </div>
         {% endfor %}
     </div>
-    
-        <form class="flex flex-row items-center gap-x-3 mx-3 my-1 bg-gray-100 rounded-xl p-3">
-            {% csrf_token %}
-            <textarea name="content" class="w-3/4 items-center bg-transparent border-none focus:outline-none resize-none text-xl placeholder:text-xl placeholder:text-gray-400" placeholder="Your message..." id="chat-message-input" required></textarea>
-            <button class="w-1/4 px-4 py-3 rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none" id="chat-message-submit">Send</button>
-        </form>
+
+    <form class="flex flex-row items-center gap-x-3 mx-3 my-1 bg-gray-100 rounded-xl p-3">
+        {% csrf_token %}
+        <textarea name="content"
+            class="w-3/4 items-center bg-transparent border-none focus:outline-none resize-none text-xl placeholder:text-xl placeholder:text-gray-400"
+            placeholder="Your message..." id="chat-message-input" required></textarea>
+        <button class="w-1/4 px-4 py-3 rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none"
+            id="chat-message-submit">Send</button>
+    </form>
 </div>
 {{ room.slug|json_script:"json-roomname" }}
 {{ request.user.username|json_script:"json-username" }}

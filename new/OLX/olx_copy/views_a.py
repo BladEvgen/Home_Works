@@ -43,10 +43,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = data["username"]
         room = data["room"]
         message = data["message"]
-        avafiruser = data.get("avafiruser","")
-        avasecuser = data.get("avasecuser","")
-        firusername = data.get("firusername","")
-        secusername = data.get("secusername","")
+        avafiruser = data.get("avafiruser", "")
+        avasecuser = data.get("avasecuser", "")
+        firusername = data.get("firusername", "")
+        secusername = data.get("secusername", "")
 
         await self.save_message(username, room, message)
 
@@ -64,12 +64,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
-
     async def chat_message(self, event):
         message = event["message"]
         username = event["username"]
         room = event["room"]
-
         avafiruser = event["avafiruser"]
         avasecuser = event["avasecuser"]
         firusername = event["firusername"]
