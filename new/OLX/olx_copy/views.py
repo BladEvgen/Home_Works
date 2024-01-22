@@ -521,17 +521,22 @@ def create_chat_room(request):
 
 
 def check_access_slug(slug: str, redirect_url: str = "home"):
-    """Параметризируемый декоратор - конструктор декоратора"""
-
     def check_access(func):
         def wrapper(*args, **kwargs):
             user: User = args[0].user
             if not user.is_authenticated:
                 return redirect(reverse(redirect_url))
-            profile: models.Profile = user.profile
+
+            try:
+                profile: models.UserProfile = models.UserProfile.objects.get(user=user)
+            except models.UserProfile.DoesNotExist:
+                return HttpResponseForbidden("Invalid Rights for YOU")
+
             is_access: bool = profile.check_access(slug)
+
             if not is_access:
                 return redirect(reverse(redirect_url))
+
             # TODO VIEW
             res = func(*args, **kwargs)
             return res
@@ -539,6 +544,7 @@ def check_access_slug(slug: str, redirect_url: str = "home"):
         return wrapper
 
     return check_access
+
 
 
 @check_access_slug(slug="UsersModeratePage_view")
