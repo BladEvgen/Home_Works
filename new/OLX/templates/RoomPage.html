@@ -7,12 +7,12 @@
 <div
     class="w-full md:w-2/3 lg:w-3/4 overflow-hidden flex flex-col m-auto border border-solid border-gray-100 rounded-xl shadow-lg my-3">
     <div class="flex flex-row items-center mx-3 my-1 bg-gray-100 rounded-t-2xl p-3 gap-x-3">
-        <span class="text-2xl"><a href="{ %url% 'product_detail' room.item.id }"> < </a>
+        {% comment %} <span class="text-2xl"><a href="{ %url% 'product_detail' room.item.id }"> < </a> {% endcomment %}
              </span>
                 {% if request.user == room.user_started %}
-                <img src="{{ room.user_opponent.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
+                <img src="{{ room.user_opponent.profile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
                 {% else %}
-                <img src="{{ room.user_started.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
+                <img src="{{ room.user_started.profile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
                 {% endif %}
 
                 <span class="font-bold text-3xl">
@@ -38,13 +38,13 @@
     </div>
 
     <div class="h-[50vh] flex flex-col gap-y-3 mx-3 overflow-y-auto" id="chat-messages"
-        data-avafiruser="{{ room.user_started.userprofile.get_avatar_url }}"
-        data-avasecuser="{{ room.user_opponent.userprofile.get_avatar_url }}" data-firusername="{{ messages.0.user }}"
+        data-avafiruser="{{ room.user_started.profile.get_avatar_url }}"
+        data-avasecuser="{{ room.user_opponent.profile.get_avatar_url }}" data-firusername="{{ messages.0.user }}"
         data-secusername="{{ request.user }}">
 
         {% for message in messages %}
         <div class="flex {% if message.user == request.user %}flex-row-reverse{% else %}flex-row{% endif %} gap-x-2">
-            <img src="{{ message.user.userprofile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
+            <img src="{{ message.user.profile.get_avatar_url }}" alt="" class="w-10 h-10 rounded-full">
 
             <div
                 class="flex flex-col rounded-xl gap-y-2 p-2 {% if message.user == request.user %}bg-violet-300{% else %}bg-gray-200{% endif %}">

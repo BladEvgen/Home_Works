@@ -21,8 +21,8 @@
 <div class="container mt-5">
     <div class="card">
                 <div class="p-3 avatar-preview-container">
-                   {% if user.userprofile.get_avatar_url %}
-                    <img src="{{ user.userprofile.get_avatar_url }}" class="avatar-preview rounded-circle" alt="User Avatar">
+                   {% if user.profile.get_avatar_url %}
+                    <img src="{{ user.profile.get_avatar_url }}" class="avatar-preview rounded-circle" alt="User Avatar">
                     {% else %}
                     <img src="{% static 'media/png/user.png' %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
                     {% endif %} 
@@ -44,8 +44,15 @@
                         <p class="card-text">Дата Регистрации: {%formatted_time user.date_joined %}</p>
                     {% if user.is_staff %}
                         <h3 class="card-title">Права:</h3>
-                        <p class="card-text">Статус рабочего: {% if user.is_staff %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
-                        <p class="card-text">Админ: {% if user.is_superuser %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+                        <p class="card-text ">Статус рабочего: 
+                            <span class="fw-bold">{% for action in user.profile.get_actions %}
+                                <br>{% if user.profile|has_action:action.slug %}
+                                    {{ action.description }}
+                                    {% if not forloop.last %},{% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            </span>
+                        </p>
                     {%endif%}
                 </div>
             </div>
