@@ -40,6 +40,17 @@ class UserProfile(models.Model):
             print("error check_access: ", error)
             return False
 
+    def get_actions(self):
+        try:
+            user: User = self.user
+            group_extend = GroupExtend.objects.get(users=user)
+            return group_extend.actions.all()
+        except GroupExtend.DoesNotExist:
+            return []
+
+    def has_action(self, action_slug: str):
+        return self.get_actions().filter(slug=action_slug).exists()
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -90,6 +101,9 @@ class GroupExtend(models.Model):
 
     def __str__(self):
         return f"Group: {self.name}"
+
+    def has_action(self, action_slug: str):
+        return self.actions.filter(slug=action_slug).exists()
 
 
 class CategoryItem(models.Model):
