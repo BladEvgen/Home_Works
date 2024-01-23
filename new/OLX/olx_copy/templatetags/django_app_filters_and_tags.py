@@ -96,3 +96,8 @@ def check_access(context: dict, action_slug: str = "") -> bool:
     profile: models.UserProfile = user.profile
     is_access: bool = profile.check_access(action_slug)
     return is_access
+
+
+@register.filter(name="has_action")
+def has_action(user_profile, action_slug):
+    return user_profile.has_action(action_slug)
