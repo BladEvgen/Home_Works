@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+import re
 from pathlib import Path
 from time import perf_counter
 from django.shortcuts import render
@@ -120,3 +121,14 @@ def decorator_error_handler(view_func):
             )
 
     return wrapper
+
+
+def password_check(password: str) -> bool:
+    return (
+        True
+        if re.match(
+            r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$", password
+        )
+        is not None
+        else False
+    )

@@ -25,7 +25,7 @@ from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.utils.translation import activate
-from olx_copy.utils import decorator_error_handler
+from olx_copy.utils import decorator_error_handler, password_check
 from olx_copy import models
 from django.db.models import Q
 
@@ -83,6 +83,13 @@ def register(request):
 
         if password != confirm_password:
             return render(request, "register.html", {"error": "Passwords do not match"})
+
+        if not password_check(password):
+            return render(
+                request,
+                "register.html",
+                {"error": "Password does not meet the required strength criteria."},
+            )
 
         existing_user = User.objects.filter(username=username).exists()
         if existing_user:
