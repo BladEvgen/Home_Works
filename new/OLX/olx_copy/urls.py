@@ -33,7 +33,22 @@ urlpatterns = [
     path("chat/<slug:room_slug>/<str:token>/", views.room, name="room"),
     path("create_chat_room/", views.create_chat_room, name="create_chat_room"),
     # * MODERATE
-    path("moderate/users/", views.moderate_users, name="moderate_users"),
+    path("moderate/users/", views.ModerateUsersView.as_view(), name="moderate_users"),
+    path(
+        "moderate/ban/<int:user_id>/",
+        views.BanUsersView.as_view(),
+        name="moderate_ban_users",
+    ),
+    path(
+        "moderate/unban/<int:user_id>/",
+        views.UnbanUsersView.as_view(),
+        name="moderate_unban_users",
+    ),
+    path(
+        "moderate/delete/<int:user_id>/",
+        views.DeleteUsersView.as_view(),
+        name="moderate_delete_users",
+    ),
 ]
 
 if settings.DEBUG:

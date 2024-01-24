@@ -1,29 +1,25 @@
+{% extends "components/base.html" %}
 {% load django_app_filters_and_tags %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<ul>
-    {% for u in users %}
-        <li>
-            {{ u.username }}
-
-            {% check_access "UsersModeratePage_ban" as access %}
-            {% if access %}
-                <a href="#">забанить</a>
+{% load static %}
+{% block main %}
+  <div class="container mt-5">
+    <h2 class="mb-4">Moderate Users</h2>
+    <ul class="list-group">
+      {% for u in users %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ u.username }}
+          {% if u != request.user %}
+            {% if u.profile.user.is_active %}
+              <a href="{% url 'moderate_ban_users' user_id=u.profile.id %}" class="btn btn-warning btn-sm">Ban</a>
+            {% else %}
+              <a href="{% url 'moderate_unban_users' user_id=u.profile.id %}" class="btn btn-success btn-sm">Unban</a>
             {% endif %}
-
-            {% check_access "UsersModeratePage_delete" as access %}
-            {% if access %}
-                <a href="#">удалить</a>
-            {% endif %}
+            <a href="{% url 'moderate_delete_users' user_id=u.profile.id %}" class="btn btn-danger btn-sm">Delete</a>
+          {% else %}
+            <span class="badge bg-secondary">You</span>
+          {% endif %}
         </li>
-    {% endfor %}
-</ul>
-
-</body>
-</html>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock main %}

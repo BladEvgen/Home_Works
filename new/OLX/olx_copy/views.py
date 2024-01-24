@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 import datetime
 from django.http import (
@@ -521,43 +522,100 @@ def create_chat_room(request):
 
 
 def check_access_slug(slug: str, redirect_url: str = "home"):
-    def check_access(func):
-        def wrapper(*args, **kwargs):
-            user: User = args[0].user
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(self, *args, **kwargs):
+            user = self.request.user
             if not user.is_authenticated:
                 return redirect(reverse(redirect_url))
 
             try:
-                profile: models.UserProfile = models.UserProfile.objects.get(user=user)
+                profile = models.UserProfile.objects.get(user=user)
             except models.UserProfile.DoesNotExist:
                 return HttpResponseForbidden("Invalid Rights for YOU")
 
-            is_access: bool = profile.check_access(slug)
+            is_access = profile.check_access(slug)
 
             if not is_access:
                 return redirect(reverse(redirect_url))
 
-            # TODO VIEW
-            res = func(*args, **kwargs)
-            return res
+            return view_func(self, *args, **kwargs)
 
-        return wrapper
+        return _wrapped_view
 
-    return check_access
+    return decorator
 
 
+class ModerateUsersView(TemplateView):
+    template_name = "ModerateUsers.html"
 
-@check_access_slug(slug="UsersModeratePage_view")
-def moderate_users(request):
-    users = User.objects.all()
-    return render(request, "ModerateUsers.html", context={"users": users})
+    @check_access_slug(slug="UsersModeratePage_view")
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["users"] = User.objects.all()
+        return context
 
 
-@check_access_slug(slug="UsersModeratePage_ban")
-def moderate_ban_users(request):
-    return render(request, "ModerateUsers.html")
+class BanUsersView(ModerateUsersView):
+    @check_access_slug(slug="UsersModeratePage_ban")
+    def get(self, request, user_id, *args, **kwargs):
+        user_profile = models.UserProfile.objects.get(id=user_id)
+
+        if user_profile:
+            if not user_profile.user.is_active:
+                messages.info(
+                    request, f"User {user_profile.user.username} is already banned."
+                )
+            else:
+                user_profile.ban_user()
+                messages.success(
+                    request,
+                    f"User {user_profile.user.username} has been banned successfully.",
+                )
+        else:
+            messages.error(request, "User not found.")
+
+        return redirect(reverse("moderate_users"))
 
 
-@check_access_slug(slug="UsersModeratePage_delete")
-def moderate_delete_users(request):
-    return render(request, "ModerateUsers.html")
+class UnbanUsersView(ModerateUsersView):
+    @check_access_slug(slug="UsersModeratePage_unban")
+    def get(self, request, user_id, *args, **kwargs):
+        user_profile = models.UserProfile.objects.get(id=user_id)
+
+        if user_profile:
+            if user_profile.user.is_active:
+                messages.info(
+                    request, f"User {user_profile.user.username} is already unbanned."
+                )
+            else:
+                user_profile.unban_user()
+                messages.success(
+                    request,
+                    f"User {user_profile.user.username} has been unbanned successfully.",
+                )
+        else:
+            messages.error(request, "User not found.")
+
+        return redirect(reverse("moderate_users"))
+
+
+class DeleteUsersView(ModerateUsersView):
+    @check_access_slug(slug="UsersModeratePage_delete")
+    def get(self, request, user_id, *args, **kwargs):
+        user_profile = models.UserProfile.objects.get(id=user_id)
+
+        if user_profile:
+            user_profile.delete_user()
+            messages.success(
+                request,
+                f"User {user_profile.user.username} has been deleted successfully.",
+            )
+        else:
+            messages.error(request, "User not found.")
+
+        return redirect(reverse("moderate_users"))

@@ -22,11 +22,27 @@ class UserProfile(models.Model):
         blank=True,
     )
 
+    is_banned = models.BooleanField(default=False)
+
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else None
 
     def __str__(self):
         return f"{self.user.username} Profile"
+
+    def ban_user(self):
+        self.user.is_active = False
+        self.user.save()
+
+    def unban_user(self):
+        self.user.is_active = True
+        self.user.save()
+
+    def delete_user(self):
+        self.user.delete()
+
+    def get_avatar_url(self):
+        return self.avatar.url if self.avatar else None
 
     def check_access(self, action_slug: str = ""):
         try:
@@ -43,8 +59,10 @@ class UserProfile(models.Model):
     def get_actions(self):
         try:
             user: User = self.user
-            group_extend = GroupExtend.objects.get(users=user)
-            return group_extend.actions.all()
+            group_extends = GroupExtend.objects.filter(users=user)
+            actions = Action.objects.filter(groupextend__in=group_extends).distinct()
+
+            return actions
         except GroupExtend.DoesNotExist:
             return []
 
@@ -378,7 +396,7 @@ class Message(models.Model):
     user = models.ForeignKey(
         verbose_name="Автор",
         to=User,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="messages",
     )
     room = models.ForeignKey(
