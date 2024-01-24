@@ -49,7 +49,6 @@
                         </a>
                         </span>
                         <h3 class="card-title">Права:</h3>
-                        <p class="card-text ">Статус рабочего: 
                             <span class="fw-bold">{% for action in user.profile.get_actions %}
                                 <br>{% if user.profile|has_action:action.slug %}
                                     {{ action.description }}
