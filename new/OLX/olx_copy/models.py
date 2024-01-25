@@ -2,6 +2,7 @@ import os
 import uuid
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.db.models.signals import post_save
@@ -24,14 +25,10 @@ class UserProfile(models.Model):
     avatar = models.ImageField(
         upload_to=user_avatar_path, null=True, blank=True, verbose_name="Аватар"
     )
-
     is_banned = models.BooleanField(default=False, verbose_name="Статус Бана")
 
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else None
-
-    def __str__(self):
-        return f"{self.user.username} Profile"
 
     def ban_user(self):
         self.user.is_active = False
@@ -71,6 +68,9 @@ class UserProfile(models.Model):
 
     def has_action(self, action_slug: str):
         return self.get_actions().filter(slug=action_slug).exists()
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
 
     class Meta:
         verbose_name = "Профиль пользователя"
@@ -247,6 +247,29 @@ class Item(models.Model):
         return f"Товар(id={self.id}, Название={self.title}, Цена={self.price}, Категория={self.category.title}, Статус={status})"
 
 
+class Cart(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Товар")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+
+    def get_total_price(self):
+        return (
+            self.item.discounted_price
+            if self.item.discounted_price
+            else self.item.price
+        )
+
+    def calculate_item_total(self):
+        return self.quantity * self.get_total_price()
+
+    class Meta:
+        verbose_name = "Элемент корзины"
+        verbose_name_plural = "Элементы корзины"
+
+
+
 class Review(models.Model):
     product = models.ForeignKey(
         "Item", on_delete=models.CASCADE, verbose_name="Название товара"
@@ -263,7 +286,7 @@ class Review(models.Model):
 
     class Meta:
         verbose_name = "Отзыв"
-        verbose_name_plural="Отзывы"
+        verbose_name_plural = "Отзывы"
 
 
 class Vip(models.Model):
