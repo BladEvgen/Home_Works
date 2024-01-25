@@ -29,10 +29,13 @@
                 <span class="price fw-bold">{% digit_beautify product.price %}  ₸</span>
             {% endif %}
         </div>
-        <form method="post" action="{% url 'add_to_cart' product.id %}">
+        <form class="d-flex justify-content-center mb-3" method="post" action="{% url 'add_to_cart' product.id %}">
             {% csrf_token %}
-            <button type="submit">Add to Cart</button>
+            <button type="submit" class="btn btn-primary ">
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
         </form>
+
     </div>
     {% if user.is_authenticated %}
             {%if request.user != product.author%}
