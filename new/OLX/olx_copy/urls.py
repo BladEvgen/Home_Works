@@ -49,6 +49,20 @@ urlpatterns = [
         views.DeleteUsersView.as_view(),
         name="moderate_delete_users",
     ),
+    # * Cart Urls
+    path("cart/", views.cart_detail, name="cart_detail"),
+    path("add_to_cart/<int:item_id>/", views.add_to_cart, name="add_to_cart"),
+    path(
+        "remove_from_cart/<int:item_id>/",
+        views.remove_from_cart,
+        name="remove_from_cart",
+    ),
+    path(
+        "update_cart_quantity/<int:item_id>/",
+        views.update_cart_quantity,
+        name="update_cart_quantity",
+    ),
+    path("checkout/", views.checkout, name="checkout"),
 ]
 
 if settings.DEBUG:
