@@ -626,3 +626,68 @@ class DeleteUsersView(ModerateUsersView):
             messages.error(request, "User not found.")
 
         return redirect(reverse("moderate_users"))
+
+
+def cart_detail(request):
+    cart_items = models.Cart.objects.filter(user=request.user)
+    total_price = sum(cart_item.calculate_item_total() for cart_item in cart_items)
+
+    return render(
+        request,
+        "cart_detail.html",
+        {"cart_items": cart_items, "total_price": total_price},
+    )
+
+
+@login_required
+def add_to_cart(request, item_id):
+    item = get_object_or_404(models.Item, id=item_id)
+    cart_item, created = models.Cart.objects.get_or_create(user=request.user, item=item)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    return redirect("cart_detail")
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    item = get_object_or_404(models.Item, id=item_id)
+    cart_item = models.Cart.objects.get(user=request.user, item=item)
+    cart_item.delete()
+
+    return redirect("cart_detail")
+
+
+@login_required
+def update_cart_quantity(request, item_id):
+    item = get_object_or_404(models.Item, id=item_id)
+    cart_item = models.Cart.objects.get(user=request.user, item=item)
+
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity"))
+        cart_item.quantity = quantity
+        cart_item.save()
+
+        total_price = cart_item.calculate_item_total()
+
+        return JsonResponse({"total": total_price})
+    else:
+        return JsonResponse({"error": "Invalid request"})
+
+
+@login_required
+def checkout(request):
+    user_profile = request.user.profile
+
+    if request.method == "POST":
+        user_profile.lastname = request.POST.get("lastname")
+        user_profile.firstname = request.POST.get("firstname")
+        user_profile.email = request.POST.get("email")
+        user_profile.phonenumber = request.POST.get("phonenumber")
+        user_profile.address = request.POST.get("address")
+        user_profile.save()
+
+        return render(request, "order_confirmation.html")
+
+    return render(request, "checkout.html", {"user_profile": user_profile})
