@@ -15,14 +15,17 @@ def user_avatar_path(instance, filename):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="profile",
+        verbose_name="Пользователь",
+    )
     avatar = models.ImageField(
-        upload_to=user_avatar_path,
-        null=True,
-        blank=True,
+        upload_to=user_avatar_path, null=True, blank=True, verbose_name="Аватар"
     )
 
-    is_banned = models.BooleanField(default=False)
+    is_banned = models.BooleanField(default=False, verbose_name="Статус Бана")
 
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else None
@@ -69,6 +72,10 @@ class UserProfile(models.Model):
     def has_action(self, action_slug: str):
         return self.get_actions().filter(slug=action_slug).exists()
 
+    class Meta:
+        verbose_name = "Профиль пользователя"
+        verbose_name_plural = "Профили пользователей"
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -93,7 +100,7 @@ class Action(models.Model):
         verbose_name_plural = "Действия"
 
     def __str__(self):
-        return f"Action: {self.slug} - {self.description[:50]}"
+        return f"Действие: {self.slug} - {self.description[:50]}"
 
 
 class GroupExtend(models.Model):
@@ -118,7 +125,7 @@ class GroupExtend(models.Model):
         verbose_name_plural = "Группы"
 
     def __str__(self):
-        return f"Group: {self.name}"
+        return f"Группа: {self.name}"
 
     def has_action(self, action_slug: str):
         return self.actions.filter(slug=action_slug).exists()
@@ -146,7 +153,7 @@ class CategoryItem(models.Model):
         verbose_name_plural = "Категории"
 
     def __str__(self) -> str:
-        return f"Category(id={self.id}, Title={self.title}, Slug={self.slug})"
+        return f"Категория(id={self.id}, Название={self.title}, Ссылка={self.slug})"
 
 
 class TagItem(models.Model):
@@ -166,7 +173,7 @@ class TagItem(models.Model):
         verbose_name_plural = "Тэги"
 
     def __str__(self) -> str:
-        return f"TagItem(id={self.id}, Title={self.title}, Slug={self.slug})"
+        return f"Тэг(id={self.id}, Название={self.title}, Ссылка={self.slug})"
 
 
 class Item(models.Model):
@@ -222,7 +229,7 @@ class Item(models.Model):
     def save(self, *args, **kwargs):
         self.discount_percentage = self.calculate_discount_percentage()
         print(
-            f"Price: {self.price}, Discounted Price: {self.discounted_price}, Discount Percentage: {self.discount_percentage}"
+            f"Цена: {self.price}, Скидоная Цена: {self.discounted_price}, Процентаж Скидки: {self.discount_percentage}"
         )
         super().save(*args, **kwargs)
 
@@ -237,16 +244,26 @@ class Item(models.Model):
 
     def __str__(self):
         status = "Активен" if self.is_active else "Продано"
-        return f"Item(id={self.id}, Title={self.title}, Price={self.price}, Category={self.category.title}, Status={status})"
+        return f"Товар(id={self.id}, Название={self.title}, Цена={self.price}, Категория={self.category.title}, Статус={status})"
 
 
 class Review(models.Model):
-    product = models.ForeignKey("Item", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    is_visible = models.BooleanField(default=True)
+    product = models.ForeignKey(
+        "Item", on_delete=models.CASCADE, verbose_name="Название товара"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    content = models.TextField(verbose_name="Комментарий")
+    is_visible = models.BooleanField(default=True, verbose_name="Видимость")
 
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата Создания"
+    )
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural="Отзывы"
 
 
 class Vip(models.Model):
@@ -261,7 +278,7 @@ class Vip(models.Model):
         default=5,
     )
     expired = models.DateTimeField(
-        verbose_name="дата и время истечения",
+        verbose_name="Дата и Время Истечения",
         default=timezone.now,
     )
 
@@ -272,13 +289,17 @@ class Vip(models.Model):
         verbose_name_plural = "Vip объявления"
 
     def __str__(self):
-        return f"Vip: {self.article.title} ({self.id}) | Priority: {self.priority}"
+        return f"Vip: {self.article.title} ({self.id}) | Приоритет: {self.priority}"
 
 
 class ItemRating(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
     item = models.ForeignKey("Item", on_delete=models.CASCADE, verbose_name="Товар")
-    is_like = models.BooleanField(default=True, verbose_name="Понравилось")
+    is_like = models.BooleanField(
+        default=True,
+        verbose_name="Лайк",
+        help_text="Статус понравился ли пользователю товар",
+    )
 
     class Meta:
         app_label = "olx_copy"
@@ -287,7 +308,7 @@ class ItemRating(models.Model):
         verbose_name_plural = "Рейтинги товаров"
 
     def __str__(self):
-        return f"ItemRating(id={self.id},\n Author={self.author.username},\n Item={self.item.title},\n Like={self.is_like})"
+        return f"Рэйтинг Товара (id={self.id},\n Автор={self.author.username},\n Товар={self.item.title},\n Статус Лайка={self.is_like})"
 
 
 # TODO PRIVATE CHAT
@@ -344,7 +365,9 @@ class Room(models.Model):
         on_delete=models.CASCADE,
     )
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Item, on_delete=models.CASCADE, verbose_name="Товар о котором идет речь"
+    )
 
     created_at = models.DateTimeField(
         verbose_name="Дата Создания",
@@ -371,6 +394,8 @@ class Room(models.Model):
         super(Room, self).save(*args, **kwargs)
 
     class Meta:
+        verbose_name = "Чат"
+        verbose_name_plural = "Чаты"
         app_label = "olx_copy"
         ordering = ("-slug", "-name")
 
@@ -415,12 +440,14 @@ class Message(models.Model):
         null=False,
     )
     date_added = models.DateTimeField(
-        verbose_name="дата и время добавления",
+        verbose_name="Дата и Время Добавления",
         default=timezone.now,
         db_index=True,
     )
 
     class Meta:
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
         app_label = "olx_copy"
         ordering = ("-date_added", "-room")
 
@@ -428,4 +455,4 @@ class Message(models.Model):
         truncated_content = (
             self.content[:30] + "..." if len(self.content) > 30 else self.content
         )
-        return f"Message from {self.user.username} in {self.room.name}: {truncated_content} ({self.date_added})"
+        return f"Сообщение от {self.user.username} в {self.room.name}: {truncated_content} ({self.date_added})"
