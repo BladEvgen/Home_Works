@@ -36,6 +36,9 @@
           <a class="navbar-brand" href="{% url 'home' %}">
             {% include "components/logo_olx.html" %}
             {% if request.user.is_authenticated %}
+              <a href="{% url 'cart_detail' %}">
+                <i class="fa fa-shopping-cart btn btn-outline-none text-warning"></i>
+              </a>
               <a href="{% url 'chat' %}" class="btn btn-outline-none text-primary">
                 <i class="fas fa-comments"></i> Open Chat Rooms
               </a>
