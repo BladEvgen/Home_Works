@@ -47,6 +47,12 @@
                         <a href="{% url "moderate_users" %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Click to access moderation page">
                             <i class="fas fa-shield-alt"></i> Модерация пользователей
                         </a>
+                        {%check_access "ModerateSite" as access%}
+                        {%if access%}
+                        <a href="{% url "ModerateSiteView" %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Click to access moderation page">
+                            <i class="fas fa-shield-alt"></i> Модерация сайта
+                        </a>
+                        {%endif%}
                         </span>
                         <h3 class="card-title">Права:</h3>
                             <span class="fw-bold">{% for action in user.profile.get_actions %}
