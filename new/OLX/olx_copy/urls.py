@@ -23,6 +23,11 @@ urlpatterns = [
     path(
         "product_detail/<int:product_id>/", views.product_detail, name="product_detail"
     ),
+    path(
+        "create_category_item/",
+        views.CreateCategoryItemView.as_view(),
+        name="create_category_item",
+    ),
     path("modify_item/<int:item_id>/", views.modify_item, name="modify_item"),
     path("user_items/", views.user_items, name="user_items"),
     path("rating/<str:item_id>/<str:is_like>/", views.rating, name="rating"),
@@ -48,6 +53,16 @@ urlpatterns = [
         "moderate/delete/<int:user_id>/",
         views.DeleteUsersView.as_view(),
         name="moderate_delete_users",
+    ),
+    path(
+        "moderate/site/",
+        views.ModerateSiteView.as_view(),
+        name="ModerateSiteView",
+    ),
+    path(
+        "create/category-item/",
+        views.CreateCategoryItemView.as_view(),
+        name="create_category_item",
     ),
     # * Cart Urls
     path("cart/", views.cart_detail, name="cart_detail"),

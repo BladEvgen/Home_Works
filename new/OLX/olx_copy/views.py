@@ -628,6 +628,40 @@ class DeleteUsersView(ModerateUsersView):
         return redirect(reverse("moderate_users"))
 
 
+class CreateCategoryItemView(View):
+    template_name = "create_category_item.html"
+
+    @check_access_slug(slug="CreateItemCategory")
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    @check_access_slug(slug="CreateItemCategory")
+    def post(self, request, *args, **kwargs):
+        title = request.POST.get("title")
+        slug = request.POST.get("slug")
+
+        if title and slug:
+            try:
+                models.CategoryItem.objects.create(title=title, slug=slug)
+                messages.success(request, "Category item created successfully.")
+                return redirect(reverse("moderate_category_items"))
+            except Exception as e:
+                messages.error(request, f"Error creating category item: {e}")
+        else:
+            messages.error(request, "Both title and slug are required.")
+
+        return render(request, self.template_name)
+
+
+class ModerateSiteView(View):
+    template_name = "moderate_site.html"
+
+    @check_access_slug(slug="ModerateSite")
+    def get(self, request, *args, **kwargs):
+        context = {}
+        return render(request, self.template_name, context)
+
+
 def cart_detail(request):
     cart_items = models.Cart.objects.filter(user=request.user)
     total_price = sum(cart_item.calculate_item_total() for cart_item in cart_items)
