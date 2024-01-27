@@ -42,7 +42,8 @@
                     {% endif %}
                         <p class="card-text">Последний Вход: {%formatted_time user.last_login %}</p>
                         <p class="card-text">Дата Регистрации: {%formatted_time user.date_joined %}</p>
-                    {% if user.is_staff %}
+                        {% check_access "UsersModeratePage_view" as access %}
+                        {%if access%}
                         <span>
                         <a href="{% url "moderate_users" %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Click to access moderation page">
                             <i class="fas fa-shield-alt"></i> Модерация пользователей
@@ -52,6 +53,7 @@
                         <a href="{% url "ModerateSiteView" %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Click to access moderation page">
                             <i class="fas fa-shield-alt"></i> Модерация сайта
                         </a>
+
                         {%endif%}
                         </span>
                         <h3 class="card-title">Права:</h3>
