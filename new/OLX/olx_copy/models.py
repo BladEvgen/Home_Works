@@ -26,6 +26,8 @@ class UserProfile(models.Model):
         upload_to=user_avatar_path, null=True, blank=True, verbose_name="Аватар"
     )
     is_banned = models.BooleanField(default=False, verbose_name="Статус Бана")
+    phonenumber = models.CharField(max_length=20, verbose_name="Номер телефона")
+    address = models.TextField(verbose_name="Адрес доставки")
 
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else None
@@ -267,7 +269,6 @@ class Cart(models.Model):
     class Meta:
         verbose_name = "Элемент корзины"
         verbose_name_plural = "Элементы корзины"
-
 
 
 class Review(models.Model):

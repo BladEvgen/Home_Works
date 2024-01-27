@@ -713,15 +713,18 @@ def update_cart_quantity(request, item_id):
 @login_required
 def checkout(request):
     user_profile = request.user.profile
+    user = request.user 
 
     if request.method == "POST":
-        user_profile.lastname = request.POST.get("lastname")
-        user_profile.firstname = request.POST.get("firstname")
-        user_profile.email = request.POST.get("email")
+        user.first_name = request.POST.get("firstname")
+        user.last_name = request.POST.get("lastname")
+        user.save()
+
         user_profile.phonenumber = request.POST.get("phonenumber")
         user_profile.address = request.POST.get("address")
         user_profile.save()
 
         return render(request, "order_confirmation.html")
 
-    return render(request, "checkout.html", {"user_profile": user_profile})
+    return render(request, "checkout.html", {"user_profile": user_profile, "user": user})
+
