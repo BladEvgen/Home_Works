@@ -96,10 +96,10 @@
         <div class="review-container">
             <div class="media mb-3 review-content">
                 <img src="{% if review.user.profile.avatar %}{{ review.user.profile.get_avatar_url }}
-                {% else %}{% static 'png/user.png' %}
+                {% else %}{% static 'media/png/user.png' %}
                 {% endif %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
                 <div class="media-body">
-                    <h5 class="mt-0">{{ review.user.username }}</h5>
+                    <h5 class="mt-0">{{ review.user.username }}</h5
                     {% if review.content|length > 200 %}
                         <p class="d-flex justify-content-center custom-justified">{{ review.content }}</p>
                     {% else %}
