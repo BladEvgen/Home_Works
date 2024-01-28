@@ -264,11 +264,45 @@ class Cart(models.Model):
         )
 
     def calculate_item_total(self):
-        return self.quantity * self.get_total_price()
+        return self.quantity * (self.item.discounted_price or self.item.price)
 
     class Meta:
         verbose_name = "Элемент корзины"
         verbose_name_plural = "Элементы корзины"
+
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ("Processing", "Processing"),
+        ("Confirmed", "Confirmed"),
+        ("Canceled", "Canceled"),
+        ("Completed", "Completed"),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    date_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="Processing",
+        verbose_name="Статус",
+    )
+    cart_items = models.ManyToManyField("Cart", verbose_name="Элементы корзины")
+
+    def get_total_price(self):
+        total_price = 0
+        for cart_item in self.cart_items.all():
+            total_price += cart_item.quantity * (
+                cart_item.item.discounted_price or cart_item.item.price
+            )
+        return total_price
+
+    class Meta:
+        ordering = ["-date_created"]
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
 
 
 class Review(models.Model):
