@@ -1,0 +1,19 @@
+{% extends "components/base.html" %}
+{% block main %}
+ <div class="container mt-5">
+    <h2>Order List</h2>
+    <h3>Processing Orders:</h3>
+    <ul>
+      {% for order in processing_orders %}
+        <li><a href="{% url 'order_detail' order.id %}">{{ order.date_created }} - Order #{{ order.id }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <h3>Confirmed Orders:</h3>
+    <ul>
+      {% for order in confirmed_orders %}
+        <li><a href="{% url 'order_detail' order.id %}">{{ order.date_created }} - Order #{{ order.id }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock main %}

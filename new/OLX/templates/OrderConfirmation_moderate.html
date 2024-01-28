@@ -1,0 +1,47 @@
+{% extends "components/base.html" %}
+{% block main %}
+  <div class="container mt-5">
+    <h3>Buyer Contact Information:</h3>
+    <p>User: {{ order.user }}</p>
+    <p>Last Name: {{ order.user.last_name }}</p>
+    <p>First Name: {{ order.user.first_name }}</p>
+    <p>Phone Number: {{ order.user.profile.phonenumber }}</p>
+    <p>Shipping Address: {{ order.user.profile.address }}</p>
+
+    <h3>Product Information:</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Total Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cart_item in order.cart_items.all %}
+          <tr>
+            <td>{{ cart_item.item.title }}</td>
+            <td>{{ cart_item.quantity }}</td>
+            <td>{{ cart_item.item.discounted_price|default:cart_item.item.price }}</td>
+            <td>{{ cart_item.calculate_item_total }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>Total Price for All Items:</h3>
+    <p>{{ order.get_total_price }}</p>
+
+    <form method="post" action="{% url 'update_order_status' order.id %}">
+      {% csrf_token %}
+      <label for="new_status">Update Order Status:</label>
+      <select name="new_status" id="new_status">
+        {% for status in order.STATUS_CHOICES %}
+          <option value="{{ status.0 }}" {% if order.status == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Update Status</button>
+    </form>
+  </div>
+{% endblock %}
