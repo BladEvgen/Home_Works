@@ -28,6 +28,7 @@ from django.utils.translation import activate
 from olx_copy.utils import decorator_error_handler, password_check
 from olx_copy import models
 from django.db.models import Q
+from django.db import transaction
 
 
 class AboutView(TemplateView):
@@ -277,7 +278,7 @@ def modify_item(request, item_id):
 
         new_image = request.FILES.get("image")
         if new_image:
-            if item.image.name != "nodatafound.png":
+            if item.image.name and item.image.name != "nodatafound.png":
                 default_storage.delete(item.image.name)
 
             image_extension = new_image.name.split(".")[-1]
@@ -711,9 +712,10 @@ def update_cart_quantity(request, item_id):
 
 
 @login_required
+@transaction.atomic
 def checkout(request):
     user_profile = request.user.profile
-    user = request.user 
+    user = request.user
 
     if request.method == "POST":
         user.first_name = request.POST.get("firstname")
@@ -724,7 +726,59 @@ def checkout(request):
         user_profile.address = request.POST.get("address")
         user_profile.save()
 
-        return render(request, "order_confirmation.html")
+        order = models.Order.objects.create(user=user)
 
-    return render(request, "checkout.html", {"user_profile": user_profile, "user": user})
+        cart_items = models.Cart.objects.filter(user=user)
 
+        print(f"User: {user}")
+        print(f"Order ID (before save): {order.id}")
+        print(f"Cart Items (before save): {cart_items}")
+
+        for cart_item in cart_items:
+            cart_item.user = order.user
+            cart_item.order = order
+            cart_item.save()
+            order.cart_items.add(cart_item)
+
+        order.refresh_from_db()
+
+        print(f"Order ID (after save): {order.id}")
+        print(
+            f"Cart Items associated with Order (after save): {order.cart_items.all()}"
+        )
+
+
+        return render(request, "order_confirmation.html", {"order": order})
+    return render(
+        request, "checkout.html", {"user_profile": user_profile, "user": user}
+    )
+
+
+@login_required
+def order_list(request):
+    processing_orders = models.Order.objects.filter(status="Processing")
+    confirmed_orders = models.Order.objects.filter(status="Confirmed")
+    return render(
+        request,
+        "OrderList.html",
+        {"processing_orders": processing_orders, "confirmed_orders": confirmed_orders},
+    )
+
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(models.Order, id=order_id)
+    return render(request, "OrderConfirmation_moderate.html", {"order": order})
+
+
+@login_required
+def update_order_status(request, order_id):
+    order = get_object_or_404(models.Order, id=order_id)
+
+    if request.method == "POST":
+        new_status = request.POST.get("new_status")
+        if new_status in [status[0] for status in models.Order.STATUS_CHOICES]:
+            order.status = new_status
+            order.save()
+
+    return render(request, "OrderConfirmation_moderate.html", {"order": order})
