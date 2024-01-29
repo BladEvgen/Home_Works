@@ -532,7 +532,8 @@ def check_access_slug(slug: str, redirect_url: str = "home"):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            user = request.user
+            user = request.user if hasattr(request, "user") else request.request.user
+
             if not user.is_authenticated:
                 return redirect(reverse(redirect_url))
 
