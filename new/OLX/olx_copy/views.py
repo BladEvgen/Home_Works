@@ -28,7 +28,6 @@ from django.utils.translation import activate
 from olx_copy.utils import decorator_error_handler, password_check
 from olx_copy import models
 from django.db.models import Q
-from django.db import transaction
 
 
 class AboutView(TemplateView):
@@ -532,22 +531,22 @@ def create_chat_room(request):
 def check_access_slug(slug: str, redirect_url: str = "home"):
     def decorator(view_func):
         @wraps(view_func)
-        def _wrapped_view(self, *args, **kwargs):
-            user = self.request.user
+        def _wrapped_view(request, *args, **kwargs):
+            user = request.user
             if not user.is_authenticated:
                 return redirect(reverse(redirect_url))
 
             try:
                 profile = models.UserProfile.objects.get(user=user)
             except models.UserProfile.DoesNotExist:
-                return HttpResponseForbidden("Invalid Rights for YOU")
+                return HttpResponseForbidden("Invalid Rights")
 
             is_access = profile.check_access(slug)
 
             if not is_access:
                 return redirect(reverse(redirect_url))
 
-            return view_func(self, *args, **kwargs)
+            return view_func(request, *args, **kwargs)
 
         return _wrapped_view
 
@@ -712,9 +711,7 @@ def update_cart_quantity(request, item_id):
 
 
 @login_required
-@transaction.atomic
 def checkout(request):
-    user_profile = request.user.profile
     user = request.user
 
     if request.method == "POST":
@@ -722,56 +719,64 @@ def checkout(request):
         user.last_name = request.POST.get("lastname")
         user.save()
 
-        user_profile.phonenumber = request.POST.get("phonenumber")
-        user_profile.address = request.POST.get("address")
-        user_profile.save()
+        user.profile.phonenumber = request.POST.get("phonenumber")
+        user.profile.address = request.POST.get("address")
+        user.profile.save()
 
         order = models.Order.objects.create(user=user)
 
         cart_items = models.Cart.objects.filter(user=user)
 
-        print(f"User: {user}")
-        print(f"Order ID (before save): {order.id}")
-        print(f"Cart Items (before save): {cart_items}")
-
         for cart_item in cart_items:
-            cart_item.user = order.user
-            cart_item.order = order
-            cart_item.save()
-            order.cart_items.add(cart_item)
+            item = cart_item.item
+            quantity = cart_item.quantity
 
-        order.refresh_from_db()
+            order_item = models.OrderItem.objects.create(
+                order=order, item=item, quantity=quantity
+            )
 
-        print(f"Order ID (after save): {order.id}")
-        print(
-            f"Cart Items associated with Order (after save): {order.cart_items.all()}"
-        )
-
+            cart_item.delete()
 
         return render(request, "order_confirmation.html", {"order": order})
+
     return render(
-        request, "checkout.html", {"user_profile": user_profile, "user": user}
+        request, "checkout.html", {"user_profile": user.profile, "user": user}
     )
 
 
 @login_required
+@check_access_slug("moder_seller")
 def order_list(request):
-    processing_orders = models.Order.objects.filter(status="Processing")
-    confirmed_orders = models.Order.objects.filter(status="Confirmed")
+    status_filter = request.GET.get("status", None)
+
+    if status_filter == "processing":
+        orders = models.Order.objects.filter(status="Processing")
+    elif status_filter == "confirmed":
+        orders = models.Order.objects.filter(status="Confirmed")
+    else:
+        orders = models.Order.objects.exclude(status__in=["Canceled", "Completed"])
+
+    total_orders_count = models.Order.objects.count()
+
     return render(
         request,
         "OrderList.html",
-        {"processing_orders": processing_orders, "confirmed_orders": confirmed_orders},
+        {
+            "orders": orders,
+            "total_orders_count": total_orders_count,
+        },
     )
 
 
 @login_required
+@check_access_slug("moder_seller")
 def order_detail(request, order_id):
     order = get_object_or_404(models.Order, id=order_id)
     return render(request, "OrderConfirmation_moderate.html", {"order": order})
 
 
 @login_required
+@check_access_slug("moder_seller")
 def update_order_status(request, order_id):
     order = get_object_or_404(models.Order, id=order_id)
 
@@ -782,3 +787,8 @@ def update_order_status(request, order_id):
             order.save()
 
     return render(request, "OrderConfirmation_moderate.html", {"order": order})
+
+
+def order_detail_user(request, order_id):
+    order = get_object_or_404(models.Order, id=order_id, user=request.user)
+    return render(request, "order_confirmation_user.html", {"order": order})
