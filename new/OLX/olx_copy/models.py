@@ -289,20 +289,46 @@ class Order(models.Model):
         default="Processing",
         verbose_name="Статус",
     )
-    cart_items = models.ManyToManyField("Cart", verbose_name="Элементы корзины")
+    items = models.ManyToManyField(
+        "Item",
+        through="OrderItem",
+        related_name="orders",
+        verbose_name="Товары в заказе",
+    )
 
     def get_total_price(self):
         total_price = 0
-        for cart_item in self.cart_items.all():
-            total_price += cart_item.quantity * (
-                cart_item.item.discounted_price or cart_item.item.price
-            )
+        for order_item in self.order_items.all():
+            total_price += (
+                order_item.item.discounted_price
+                if order_item.item.discounted_price
+                else order_item.item.price
+            ) * order_item.quantity
         return total_price
 
     class Meta:
         ordering = ["-date_created"]
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="order_items"
+    )
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Товар")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+
+    def calculate_item_total(self):
+        return (
+            self.item.discounted_price
+            if self.item.discounted_price
+            else self.item.price
+        ) * self.quantity
+
+    class Meta:
+        verbose_name = "Элемент заказа"
+        verbose_name_plural = "Элементы заказа"
 
 
 class Review(models.Model):
