@@ -15,6 +15,7 @@ from .models import (
     Action,
     GroupExtend,
     Order,
+    OrderItem,
 )
 
 admin.site.site_header = "Панель управления"
