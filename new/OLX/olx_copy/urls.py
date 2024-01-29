@@ -77,26 +77,19 @@ urlpatterns = [
         views.update_cart_quantity,
         name="update_cart_quantity",
     ),
-    
-    
-    
-    
-    
     # * Order views
     path("checkout/", views.checkout, name="checkout"),
     path("order_list/", views.order_list, name="order_list"),
     path("order_detail/<int:order_id>/", views.order_detail, name="order_detail"),
     path(
+        "order-detail-user/<int:order_id>/", views.order_detail_user, name="order_detail_user"
+    ),
+    path(
         "update_order_status/<int:order_id>/",
         views.update_order_status,
         name="update_order_status",
     ),
-    
-    
-    
-    
 ]
-
 
 
 if settings.DEBUG:
