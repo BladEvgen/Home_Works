@@ -64,8 +64,8 @@ class Utils:
         try:
             with open(Utils.CONFIG_FILE, "r") as config_file:
                 config = json.load(config_file)
-                Utils.HOST = config.get("host", "127.0.0.1")
-                Utils.PORT = config.get("port", 8000)
+                Utils.HOST = config.get("host", "")
+                Utils.PORT = config.get("port", "")
         except Exception as error:
             Utils.save_error_to_db(str(error))
 
@@ -212,12 +212,12 @@ class Ui(QWidget):
         if _rows is not None:
             _params = dict((str(x[0]), str(x[1])) for x in _rows)
             _params[key] = str(int(_params.get(key, -7)) + delta)
-            for k, v in _params.items():
-                Utils.sql_execute(
-                    _query=Utils.Query.get_insert_or_replace_params(),
-                    _kwargs={"key": str(k), "value": str(v)},
-                    _source="local_settings.db",
-                )
+            # Use a single query to update the params
+            Utils.sql_execute(
+                _query=Utils.Query.get_insert_or_replace_params(),
+                _kwargs={"key": str(key), "value": str(_params[key])},
+                _source="local_settings.db",
+            )
             threading.Thread(target=Utils.sync_settings_to_web, daemon=True).start()
 
     def push_button_temp_plan_plus(self):
@@ -246,13 +246,17 @@ class Ui(QWidget):
             self.ui.label_temp_plan_down.setText(str(self.__params["temp_plan_down"]))
 
     def loop(self):
-        Utils.loop(
-            self.update_ui_from_local_settings, (), 0.1, "update_ui_from_local_settings"
-        )
-        # web syncing is disabled
-        Utils.loop(
-            Utils.sync_settings_from_web, (), 3.0, "Utils.sync_settings_from_web"
-        )
+        while threading.main_thread().is_alive():
+            Utils.loop(
+                self.update_ui_from_local_settings,
+                (),
+                0.1,
+                "update_ui_from_local_settings",
+            )
+            # web syncing is disabled
+            Utils.loop(
+                Utils.sync_settings_from_web, (), 3.0, "Utils.sync_settings_from_web"
+            )
 
 
 if __name__ == "__main__":
