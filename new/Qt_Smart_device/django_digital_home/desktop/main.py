@@ -1,3 +1,4 @@
+import os
 import datetime
 import json
 import sys
@@ -10,25 +11,43 @@ import requests
 
 
 class Utils:
-    HOST = "127.0.0.1"
-    PORT = 8000
+    CONFIG_FILE = os.path.abspath(
+        os.path.join("django_digital_home", "desktop", "src", "config.json")
+    )
+
+    @staticmethod
+    def get_database_path(database_filename):
+        base_path = os.path.abspath(
+            os.path.join("django_digital_home", "desktop", "src", "database")
+        )
+        return os.path.join(base_path, database_filename)
 
     class Query:
         @staticmethod
+        def create_table_error_log() -> str:
+            return """
+                CREATE TABLE IF NOT EXISTS error_log (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME NOT NULL,
+                    message TEXT NOT NULL
+                );
+                """
+
         def create_table_params() -> str:
             return """
                 CREATE TABLE IF NOT EXISTS params (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    key TEXT UNIQUE NOT NULL,
-                    value TEXT NOT NULL DEFAULT ''
-                );"""
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL
+                );
+                """
 
         @staticmethod
         def get_all_params() -> str:
             return """
-            SELECT key, value 
-            FROM params
-            ;"""
+                SELECT key, value 
+                FROM params
+                ;"""
 
         @staticmethod
         def get_insert_or_replace_params() -> str:
@@ -41,29 +60,70 @@ class Utils:
                 ;"""
 
     @staticmethod
+    def load_config():
+        try:
+            with open(Utils.CONFIG_FILE, "r") as config_file:
+                config = json.load(config_file)
+                Utils.HOST = config.get("host", "127.0.0.1")
+                Utils.PORT = config.get("port", 8000)
+        except Exception as error:
+            Utils.save_error_to_db(str(error))
+
+    @staticmethod
+    def create_error_log_table():
+        try:
+            with sqlite3.connect(Utils.get_database_path("error_log.db")) as connection:
+                connection.execute(Utils.Query.create_table_error_log())
+        except Exception as db_error:
+            print(f"Database error while creating error log table: {db_error}")
+
+    @staticmethod
+    def save_error_to_db(error_message: str):
+        try:
+            with sqlite3.connect(Utils.get_database_path("error_log.db")) as connection:
+                connection.execute(
+                    """
+                    INSERT INTO error_log (timestamp, message)
+                    VALUES (?, ?)
+                    """,
+                    (datetime.datetime.now(), error_message),
+                )
+        except Exception as db_error:
+            print(f"Database error while saving error: {db_error}")
+
+    @staticmethod
     def sql_execute(_query: str, _kwargs: dict, _source: str):
         try:
             with sqlite3.connect(
                 f"django_digital_home/desktop/src/database/{_source}"
             ) as _connection:
                 _connection.execute(_query, _kwargs)
-                _data = _connection.execute(Utils.Query.get_all_params()).fetchall()
+                if "params" in _query:
+                    _data = _connection.execute(Utils.Query.get_all_params()).fetchall()
+                else:
+                    _data = None
             return _data
         except Exception as error:
-            print(error)
+            Utils.save_error_to_db(str(error))
             return None
 
     @staticmethod
     def database_init():
+        Utils.load_config()
+        Utils.create_error_log_table()
         Utils.sql_execute(
             _query=Utils.Query.create_table_params(),
             _kwargs={},
             _source="local_settings.db",
         )
+        Utils.sql_execute(
+            _query=Utils.Query.create_table_error_log(),
+            _kwargs={},
+            _source="error_log.db",
+        )
 
     @staticmethod
     def sync_settings_to_web():
-        
         _rows = Utils.sql_execute(
             _query=Utils.Query.get_all_params(),
             _kwargs={},
@@ -77,10 +137,13 @@ class Utils:
                     headers={"Authorization": "Token=auth1234"},
                     data=json.dumps({"id": "970801", "params": _params}),
                 )
+                _response.raise_for_status()
                 if _response.status_code not in (200, 201):
                     raise Exception(f"WEB ERROR {_response.status_code}")
+            except requests.exceptions.HTTPError as http_error:
+                Utils.save_error_to_db(f"HTTP error occurred: {http_error}")
             except Exception as error:
-                # print(error)
+                Utils.save_error_to_db(f"An error occurred: {error}")
                 pass
 
     @staticmethod
@@ -90,6 +153,7 @@ class Utils:
                 f"http://{Utils.HOST}:{Utils.PORT}/api/settings/get/",
                 headers={"Authorization": "Token=auth123"},
             )
+            _response.raise_for_status()
             if _response.status_code not in (200, 201):
                 raise Exception(f"WEB ERROR {_response.status_code}")
             _data = _response.json().get("data", {})
@@ -99,23 +163,28 @@ class Utils:
                     _kwargs={"key": str(k), "value": str(v)},
                     _source="local_settings.db",
                 )
+        except requests.exceptions.HTTPError as http_error:
+            Utils.save_error_to_db(f"HTTP error occurred: {http_error}")
         except Exception as error:
-            print(error)
+            Utils.save_error_to_db(f"An error occurred: {error}")
 
     @staticmethod
     def loop(target: callable, args: tuple, delay: float | int, prefix: str):
-        while True:
+        while threading.main_thread().is_alive():
             try:
                 threading.Thread(target=target, args=args, daemon=True).start()
             except Exception as error:
-                print(f"{datetime.datetime.now()} {prefix}:", error)
+                Utils.save_error_to_db(f"{datetime.datetime.now()} {prefix}: {error}")
             time.sleep(delay)
 
 
 class Ui(QWidget):
     def __init__(self):
         super().__init__()
-        self.ui = uic.loadUi("django_digital_home/desktop/src/main.ui", self)
+        self.ui = uic.loadUi(
+            os.path.join("django_digital_home", "desktop", "src", "main.ui"),
+            self,
+        )
         self.__params = {}
 
         self.ui.pushButton_temp_plan_plus.clicked.connect(
@@ -124,11 +193,17 @@ class Ui(QWidget):
         self.ui.pushButton_temp_plan_minus.clicked.connect(
             self.push_button_temp_plan_minus
         )
+        self.ui.pushButton_temp_plan_plus_freezer.clicked.connect(
+            self.push_button_temp_plan_plus_freezer
+        )
+        self.ui.pushButton_temp_plan_minus_freezer.clicked.connect(
+            self.push_button_temp_plan_minus_freezer
+        )
 
         self.show()
         threading.Thread(target=self.loop, daemon=True).start()
 
-    def push_button_temp_plan(self, delta):
+    def push_button_temp_plan(self, delta, key):
         _rows = Utils.sql_execute(
             _query=Utils.Query.get_all_params(),
             _kwargs={},
@@ -136,8 +211,7 @@ class Ui(QWidget):
         )
         if _rows is not None:
             _params = dict((str(x[0]), str(x[1])) for x in _rows)
-            for key in ["temp_plan_high", "temp_plan_down"]:
-                _params[key] = str(int(_params.get(key, -7)) + delta)
+            _params[key] = str(int(_params.get(key, -7)) + delta)
             for k, v in _params.items():
                 Utils.sql_execute(
                     _query=Utils.Query.get_insert_or_replace_params(),
@@ -147,10 +221,16 @@ class Ui(QWidget):
             threading.Thread(target=Utils.sync_settings_to_web, daemon=True).start()
 
     def push_button_temp_plan_plus(self):
-        self.push_button_temp_plan(1)
+        self.push_button_temp_plan(1, "temp_plan_high")
 
     def push_button_temp_plan_minus(self):
-        self.push_button_temp_plan(-1)
+        self.push_button_temp_plan(-1, "temp_plan_high")
+
+    def push_button_temp_plan_plus_freezer(self):
+        self.push_button_temp_plan(1, "temp_plan_down")
+
+    def push_button_temp_plan_minus_freezer(self):
+        self.push_button_temp_plan(-1, "temp_plan_down")
 
     def update_ui_from_local_settings(self):
         _rows = Utils.sql_execute(
@@ -169,8 +249,10 @@ class Ui(QWidget):
         Utils.loop(
             self.update_ui_from_local_settings, (), 0.1, "update_ui_from_local_settings"
         )
-        # web syncing is disabled 
-        # Utils.loop(Utils.sync_settings_from_web, (), 3.0, "Utils.sync_settings_from_web")
+        # web syncing is disabled
+        Utils.loop(
+            Utils.sync_settings_from_web, (), 3.0, "Utils.sync_settings_from_web"
+        )
 
 
 if __name__ == "__main__":
