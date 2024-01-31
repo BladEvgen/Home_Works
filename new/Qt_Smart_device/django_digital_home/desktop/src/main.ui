@@ -25,8 +25,8 @@
   <widget class="QLabel" name="label_current_temp">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>10</y>
+     <x>260</x>
+     <y>0</y>
      <width>381</width>
      <height>61</height>
     </rect>
@@ -59,7 +59,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Fridge Temperature:      -7°C</string>
+    <string>Fridge Temperature:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_freezer_temp">
@@ -78,7 +78,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Freezer Temperature:   -15°C</string>
+    <string>Freezer Temperature:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_temp_plan_high">
@@ -234,7 +234,7 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>310</x>
      <y>60</y>
      <width>71</width>
      <height>51</height>
@@ -253,7 +253,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>420</x>
      <y>60</y>
      <width>131</width>
      <height>51</height>
@@ -266,7 +266,123 @@
     </font>
    </property>
    <property name="text">
-    <string>Standart:</string>
+    <string>Plan:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Fact_hight">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>130</y>
+     <width>71</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Yu Gothic UI</family>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>-7°C</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Fact_down">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>190</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Yu Gothic UI</family>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>-15°C</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_temp_plan_plus_freezer">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>190</y>
+     <width>75</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>+</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_temp_plan_minus_freezer">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>190</y>
+     <width>75</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="autoExclusive">
+    <bool>false</bool>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
