@@ -15,10 +15,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import (
     TemplateView,
     View,
-    ListView,
-    DetailView,
-    DeleteView,
-    CreateView,
 )
 from django.contrib import messages
 from django.core.files.storage import default_storage
