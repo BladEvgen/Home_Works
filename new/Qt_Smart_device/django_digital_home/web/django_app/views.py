@@ -16,7 +16,6 @@ def get_params_dict(rows):
 
 def get_params_rows(source_folder="database"):
     try:
-        print("Attempting to connect to the database...")
         rows = utils.Sql.sql_execute(
             _query="SELECT key, value FROM params;",
             _kwargs={},
@@ -69,7 +68,7 @@ def index(request):
 
 
 @utils.auth_paramaterized_decorator(_token="Token=auth123")
-def settings_get(request) -> dict:
+def settings_get(request):
     try:
         rows = get_params_rows()
         params_dict = get_params_dict(rows)
@@ -77,10 +76,10 @@ def settings_get(request) -> dict:
             "temp_plan_high": params_dict.get("temp_plan_high", ""),
             "temp_plan_down": params_dict.get("temp_plan_down", ""),
         }
-        return {"data": data}
+        return JsonResponse(data)
     except Exception as error:
         log_error(str(error))
-        return {"error": str(error)}
+        return JsonResponse({"error": str(error)})
 
 
 @csrf_exempt
