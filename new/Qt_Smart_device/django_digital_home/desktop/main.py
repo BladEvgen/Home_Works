@@ -94,9 +94,7 @@ class Utils:
     @staticmethod
     def sql_execute(_query: str, _kwargs: dict, _source: str):
         try:
-            with sqlite3.connect(
-                f"django_digital_home/desktop/src/database/{_source}"
-            ) as _connection:
+            with sqlite3.connect(Utils.get_database_path(_source)) as _connection:
                 _connection.execute(_query, _kwargs)
                 if "params" in _query:
                     _data = _connection.execute(Utils.Query.get_all_params()).fetchall()
@@ -212,7 +210,6 @@ class Ui(QWidget):
         if _rows is not None:
             _params = dict((str(x[0]), str(x[1])) for x in _rows)
             _params[key] = str(int(_params.get(key, -7)) + delta)
-            # Use a single query to update the params
             Utils.sql_execute(
                 _query=Utils.Query.get_insert_or_replace_params(),
                 _kwargs={"key": str(key), "value": str(_params[key])},
@@ -253,7 +250,6 @@ class Ui(QWidget):
                 0.1,
                 "update_ui_from_local_settings",
             )
-            # web syncing is disabled
             Utils.loop(
                 Utils.sync_settings_from_web, (), 3.0, "Utils.sync_settings_from_web"
             )
