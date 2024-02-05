@@ -1,7 +1,10 @@
+from functools import wraps
 import sqlite3
 import os
 from django.http import JsonResponse
 from datetime import datetime
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 
 class Utils:
@@ -17,17 +20,39 @@ class Utils:
         return datetime.now()
 
 
+class DRF:
+    @staticmethod
+    def decor_error(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            _request: Request = args[0]
+            try:
+                _response: dict = func(*args, **kwargs)
+                return Response(data=_response, status=200)
+            except Exception as error:
+                print(error)
+                # TODO ЛОГИРОВАНИЕ
+                return Response(data={"error": str(error)}, status=500)
+
+        return wrapper
+
+
 def auth_paramaterized_decorator(_token: str = ""):
     def decor(func):
         def wrapper(*args, **kwargs):
-            if args[0].headers.get("Authorization", "") != _token:
-                return JsonResponse(data={"error": "Not valid token"}, status=401)
+            received_token = args[0].headers.get("Authorization", "")
+            print("Received Token:", received_token)  # Add this line for debugging
+
+            if received_token != _token:
+                return JsonResponse(
+                    {"error": "Not valid token"}, status=401, safe=False
+                )
             try:
                 _response: dict = func(*args, **kwargs)
-                return JsonResponse(data=_response, status=200)
+                return JsonResponse(data=_response, status=200, safe=False)
             except Exception as error:
-                Utils.save_error_to_db(str(error))
-                return JsonResponse(data={"error": str(error)}, status=500)
+                Sql.save_error_to_db(str(error))
+                return JsonResponse({"error": str(error)}, status=500, safe=False)
 
         return wrapper
 
@@ -70,7 +95,7 @@ class Sql:
             with Sql.connect_db(Utils.get_database_path(_source)) as connection:
                 return Sql.execute_query(connection, _query, _kwargs)
         except Exception as error:
-            Utils.save_error_to_db(str(error))
+            Sql.save_error_to_db(str(error))
             return None
 
     @staticmethod

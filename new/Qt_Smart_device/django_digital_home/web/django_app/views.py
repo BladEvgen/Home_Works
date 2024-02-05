@@ -1,9 +1,10 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 from django_app import utils
+from django.shortcuts import redirect
 
 
 def get_params_dict(rows):
@@ -54,7 +55,6 @@ def render_home(request, params):
 def home(request):
     try:
         _rows = get_params_rows()
-
         _params = get_params_dict(_rows)
         return render(request, "index.html", context={"params": _params})
     except Exception as error:
@@ -67,7 +67,8 @@ def index(request):
     return JsonResponse(data={"message": "OK"})
 
 
-@utils.auth_paramaterized_decorator(_token="Token=auth123")
+@api_view(["GET"])
+@utils.DRF.decor_error
 def settings_get(request):
     try:
         rows = get_params_rows()
@@ -82,9 +83,10 @@ def settings_get(request):
         return JsonResponse({"error": str(error)})
 
 
+@api_view(["POST"])
+@utils.DRF.decor_error
 @csrf_exempt
-@utils.auth_paramaterized_decorator(_token="Token=auth1234")
-def settings_set(request) -> dict:
+def settings_set(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
         for k, v in data.get("params", {}).items():
@@ -93,13 +95,15 @@ def settings_set(request) -> dict:
                 _kwargs={"key": str(k), "value": str(v)},
                 _source=utils.Utils.get_database_path("local_settings.db"),
             )
-        return {"data": "OK"}
+        return JsonResponse({"data": "OK"})
     except Exception as error:
         log_error(str(error))
-        return {"error": str(error)}
+        return JsonResponse({"error": str(error)})
 
 
-def settings_change(request) -> dict:
+@api_view(["GET"])
+@utils.DRF.decor_error
+def settings_change(request):
     try:
         name = request.GET.get("name")
         action = request.GET.get("action")
@@ -113,7 +117,7 @@ def settings_change(request) -> dict:
         elif action == "minus":
             value -= 1
         else:
-            return {"error": "Unknown action!"}
+            return JsonResponse({"error": "Unknown action!"})
 
         utils.Sql.sql_execute(
             _query="INSERT OR REPLACE INTO params (key, value) VALUES (:key, :value);",
@@ -121,7 +125,7 @@ def settings_change(request) -> dict:
             _source=utils.Utils.get_database_path("local_settings.db"),
         )
 
-        return redirect(reverse("home"))
+        return {"data": "OK"}
     except Exception as error:
         log_error(str(error))
         return {"error": str(error)}
