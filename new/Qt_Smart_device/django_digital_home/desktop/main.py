@@ -66,6 +66,7 @@ class Utils:
                 config = json.load(config_file)
                 Utils.HOST = config.get("host", "")
                 Utils.PORT = config.get("port", "")
+                Utils.SERIAL_ID = config.get("serial_id", "")
         except Exception as error:
             Utils.save_error_to_db(str(error))
 
@@ -132,8 +133,11 @@ class Utils:
             try:
                 _response = requests.post(
                     url=f"http://{Utils.HOST}:{Utils.PORT}/api/settings/set/",
-                    headers={"Authorization": "Token=auth1234"},
-                    data=json.dumps({"id": "970801", "params": _params}),
+                    headers={
+                        "Authorization": "Token=auth1234",
+                        "serial_id": Utils.SERIAL_ID,
+                    },
+                    data=json.dumps({"params": _params}),
                 )
                 _response.raise_for_status()
                 if _response.status_code not in (200, 201):
@@ -142,7 +146,6 @@ class Utils:
                 Utils.save_error_to_db(f"HTTP error occurred: {http_error}")
             except Exception as error:
                 Utils.save_error_to_db(f"An error occurred: {error}")
-                pass
 
     @staticmethod
     def sync_settings_from_web():
@@ -155,12 +158,15 @@ class Utils:
             if _response.status_code not in (200, 201):
                 raise Exception(f"WEB ERROR {_response.status_code}")
             _data = _response.json().get("data", {})
-            for k, v in _data.items():
-                Utils.sql_execute(
-                    _query=Utils.Query.get_insert_or_replace_params(),
-                    _kwargs={"key": str(k), "value": str(v)},
-                    _source="local_settings.db",
-                )
+            with sqlite3.connect(
+                Utils.get_database_path("local_settings.db")
+            ) as connection:
+                for k, v in _data.items():
+                    if k == "temp_plan_down":
+                        connection.execute(
+                            Utils.Query.get_insert_or_replace_params(),
+                            {"key": str(k), "value": str(v)},
+                        )
         except requests.exceptions.HTTPError as http_error:
             Utils.save_error_to_db(f"HTTP error occurred: {http_error}")
         except Exception as error:
