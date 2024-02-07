@@ -1,6 +1,7 @@
 import datetime
 import json
 from django.http import JsonResponse
+from django.utils import timezone
 from .models import Device, DeviceData
 from rest_framework.response import Response
 from rest_framework import status
@@ -48,13 +49,12 @@ def sent_message_api(request):
         device_info["id"] for device_info in not_in_network_data
     )
 
-    all_data = DeviceData.objects.exclude(device_id__in=no_network_device_ids).values()
-
-    for device_info in not_in_network_data:
-        device_id = device_info["device_id"]
-        last_seen_time = device_info["last_seen_time"]
-        print(f"Device {device_id} last seen at {last_seen_time}. Not in network.")
-
+    current_date = timezone.now().date()
+    all_data = (
+        DeviceData.objects.exclude(device_id__in=no_network_device_ids)
+        .filter(device_time__date=current_date)
+        .values()
+    )
     response_data = {
         "no_network_data": not_in_network_data,
         "data": list(all_data),
