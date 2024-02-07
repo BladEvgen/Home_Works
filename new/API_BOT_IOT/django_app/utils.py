@@ -15,7 +15,10 @@ def check_device_status():
 
         if last_data:
             time_difference = current_time - last_data.device_time.replace(tzinfo=None)
-            if time_difference.total_seconds() > 300:
+            if (
+                time_difference.total_seconds() > 300
+                and time_difference.total_seconds() <= 86400
+            ):
                 device_info = {
                     "id": device.id,
                     "device_id": device.device_id,
