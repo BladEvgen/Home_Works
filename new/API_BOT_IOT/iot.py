@@ -36,12 +36,13 @@ def send_data_to_server(data):
     config = load_config()
     url = f"http://{config['ip']}:{config['port']}/api/get_params/"
     response = requests.post(url, json=data)
-    if response.status_code == 200:
+    if response.status_code in (200, 201):
         print("Data sent successfully.")
     else:
         print(f"Failed to send data. Status code: {response.status_code}")
 
 
 if __name__ == "__main__":
-    random_data = generate_random_data(5)
+    random_data = generate_random_data(1)
+    # print(json.dumps(random_data, indent=4))  # Debug print for manually check api
     send_data_to_server(random_data)
