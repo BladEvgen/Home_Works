@@ -1,12 +1,14 @@
-import datetime
+import imp
 import json
+import datetime
+from datetime import timedelta
 from django.http import JsonResponse
-from django.utils import timezone
-from .models import Device, DeviceData
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from . import utils
+from .models import Device, DeviceData
 
 
 @api_view(["POST"])
@@ -49,12 +51,8 @@ def sent_message_api(request):
         device_info["id"] for device_info in not_in_network_data
     )
 
-    current_date = timezone.now().date()
-    all_data = (
-        DeviceData.objects.exclude(device_id__in=no_network_device_ids)
-        .filter(device_time__date=current_date)
-        .values()
-    )
+    all_data = DeviceData.objects.exclude(device_id__in=no_network_device_ids).values()
+
     response_data = {
         "no_network_data": not_in_network_data,
         "data": list(all_data),
