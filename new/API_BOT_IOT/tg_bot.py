@@ -1,18 +1,18 @@
-import sqlite3
-import requests
-import time
 import json
 import signal
+import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime
 
+import requests
 from telegram import Bot, Update
 from telegram.ext import (
-    CommandHandler,
-    Updater,
     CallbackContext,
-    MessageHandler,
+    CommandHandler,
     Filters,
+    MessageHandler,
+    Updater,
 )
 
 with open("tg_config.json") as config_file:
@@ -20,6 +20,7 @@ with open("tg_config.json") as config_file:
 
 TOKEN = config.get("telegram_bot_token")
 bot = Bot(token=TOKEN)
+updater = None
 
 API_URL = f"http://{config['ip']}:{config['port']}/api/sent_messages/"
 
@@ -57,17 +58,25 @@ def log_error(error_msg):
         conn.commit()
 
 
+def is_send_time(current_time):
+    return (
+        current_time.hour >= 7 and current_time.hour < 20 and current_time.minute == 0
+    )
+
+
 def send_message():
-    try:
-        response = requests.get(API_URL)
-        response.raise_for_status()
-        data = response.json()
-        message = format_message(data)
-        send_to_subscribers(message)
-    except requests.exceptions.RequestException as e:
-        error_msg = f"Error occurred: {str(e)}"
-        print(error_msg)
-        log_error(error_msg)
+    current_time = datetime.now()
+    if is_send_time(current_time):
+        try:
+            response = requests.get(API_URL)
+            response.raise_for_status()
+            data = response.json()
+            message = format_message(data)
+            send_to_subscribers(message)
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Error occurred: {str(e)}"
+            print(error_msg)
+            log_error(error_msg)
 
 
 def format_message(data):
@@ -75,7 +84,7 @@ def format_message(data):
     for item in data["data"]:
         status = "Работает" if item["is_working"] else "Не работает"
         formatted_data.append(
-            f"Серийный номер: {item['device_id']}\n"
+            f"Серийный номер: {item['device_id_actual']}\n"
             f"- Статус: {status}\n"
             f"- Уровень топлива: {item['fuel']} L\n"
             f"- Скорость: {item['speed']} Km/h\n"
@@ -84,7 +93,7 @@ def format_message(data):
     no_network_devices = []
     for device in data["no_network_data"]:
         no_network_devices.append(
-            f"- Серийный номер: {device['id']} \n (Время последнего подключения: {device['last_seen_time']})"
+            f"-  Устройство номер: {device['device_id']} \n (Время последнего подключения: {device['last_seen_time']})"
         )
 
     message = "\n\n".join(formatted_data)
@@ -151,10 +160,11 @@ def unsubscribe(update: Update, context: CallbackContext) -> None:
 
 
 def stop_program(signal, frame):
-    global cycle
+    global cycle, updater
     print("Stopping program...")
     cycle = False
-    updater.stop()
+    if updater:
+        updater.stop()
     print("Program stopped.")
     exit(0)
 
@@ -176,10 +186,19 @@ def main():
     updater.start_polling()
 
     cycle = True
+    last_minute_checked = None
+    message_sent = False
     try:
         while cycle:
-            send_message()
-            time.sleep(5)
+            current_time = datetime.now()
+            if current_time.second % 5 == 0:
+                if current_time.minute != last_minute_checked:
+                    last_minute_checked = current_time.minute
+                    message_sent = False
+                if is_send_time(current_time) and not message_sent:
+                    send_message()
+                    message_sent = True
+            time.sleep(1)
     except KeyboardInterrupt:
         stop_program(signal.SIGINT, None)
 
