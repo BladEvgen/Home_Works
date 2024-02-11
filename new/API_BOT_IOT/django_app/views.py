@@ -1,7 +1,7 @@
-import imp
-import json
 import datetime
-from datetime import timedelta
+import json
+
+from django.db.models import F
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -51,7 +51,11 @@ def sent_message_api(request):
         device_info["id"] for device_info in not_in_network_data
     )
 
-    all_data = DeviceData.objects.exclude(device_id__in=no_network_device_ids).values()
+    all_data = (
+        DeviceData.objects.exclude(device_id__in=no_network_device_ids)
+        .annotate(device_id_actual=F("device__device_id"))
+        .values()
+    )
 
     response_data = {
         "no_network_data": not_in_network_data,
