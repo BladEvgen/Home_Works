@@ -34,7 +34,9 @@ def generate_random_data(num_entries):
 
 def send_data_to_server(data):
     config = load_config()
-    url = f"http://{config['ip']}:{config['port']}/api/get_params/"
+    ip = config.get("ip", "127.0.0.1")
+    port = config.get("port", 8000)
+    url = f"http://{ip}:{port}/api/get_params/"
     response = requests.post(url, json=data)
     if response.status_code in (200, 201):
         print("Data sent successfully.")
@@ -43,6 +45,6 @@ def send_data_to_server(data):
 
 
 if __name__ == "__main__":
-    random_data = generate_random_data(1)
+    random_data = generate_random_data(3)
     # print(json.dumps(random_data, indent=4))  # Debug print for manually check api
     send_data_to_server(random_data)
