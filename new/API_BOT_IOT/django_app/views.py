@@ -34,7 +34,8 @@ def get_params_api(request):
             speed=data.get("speed"),
             device_time=datetime.datetime.strptime(
                 str(data.get("device_time")), "%Y-%m-%d %H:%M:%S"
-            ),
+            )
+            + datetime.timedelta(hours=6),
         )
         device_data_list.append(device_data)
 
