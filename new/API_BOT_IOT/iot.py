@@ -46,5 +46,5 @@ def send_data_to_server(data):
 
 if __name__ == "__main__":
     random_data = generate_random_data(3)
-    # print(json.dumps(random_data, indent=4))  # Debug print for manually check api
+    print(json.dumps(random_data, indent=4))  # Debug print for manually check api
     send_data_to_server(random_data)
