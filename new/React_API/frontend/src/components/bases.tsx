@@ -3,7 +3,7 @@ import * as navbars from "./navbars";
 
 export function Base1({ children }: any) {
   return (
-    <main className={"text-bg-dark text-white custom-main"}>
+    <main className={"container text-bg-dark text-white custom-main "}>
       <navbars.Navbar1 />
       <div>{children}</div>
       <footers.Footer1 />
@@ -12,5 +12,9 @@ export function Base1({ children }: any) {
 }
 
 export function Base2({ children }: any) {
-  return <div>{children}</div>;
+  return (
+    <main className={"container text-bg-dark text-white custom-main "}>
+      <div>{children}</div>
+    </main>
+  );
 }
