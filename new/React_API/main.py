@@ -179,3 +179,8 @@ async def submit_answer_api(team_id: int, question_id: int, chosen_option: int):
 async def get_scores_api():
     scores = await get_scores()
     return {"scores": scores}
+
+
+@app.get("/api/")
+async def api():
+    return {"message": "Ok"}
