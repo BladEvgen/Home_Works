@@ -1,4 +1,3 @@
-// import App from "..";
 import App from "..";
 import * as bases from "../components/bases";
 
