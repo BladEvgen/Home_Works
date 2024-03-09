@@ -1,35 +1,44 @@
 from django.test import TestCase
 import requests
 
-# Create your tests here.
+API_URL = "http://localhost:8000/api/"
 
 
-def tests():
+def make_request(method, endpoint, data=None):
+    url = API_URL + endpoint
     try:
-        response = requests.get("http://localhost:8000/api/user/list/")
-        print(response, response.status_code)
-        print(response.json())
+        response = requests.request(method, url, data=data)
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+
+def run_tests():
+    try:
+        response = make_request("GET", "user/list/")
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
-
     except:
         print("УСПЕХ")
 
     try:
-        data: dict[str, str] = {"username": "Evgen_12", "password": "Evgen_12345678"}
-        response = requests.post("http://localhost:8000/api/token/", data)
-        print(response, response.status_code)
-        print(response.json())
+        data = {"username": "Evgen_32", "password": "Qwertyu123!"}
+        response = make_request("POST", "token/", data=data)
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
     except:
         print("Успех token на не правильного")
+
     token = ""
     try:
-        data: dict[str, str] = {"username": "Evgen_1", "password": "Evgen_12345678"}
-        response = requests.post("http://localhost:8000/api/token/", data)
-        print(response, response.status_code)
-        print(response.json())
+        data = {"username": "Evgen_3", "password": "Qwertyu123!"}
+        response = make_request("POST", "token/", data=data)
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
         token = response.json()["token"]
@@ -38,18 +47,17 @@ def tests():
         print("не успех")
 
     try:
-        response = requests.get(f"http://localhost:8000/api/token/check/?token={token}")
-        print(response, response.status_code)
+        response = make_request("GET", f"token/check/?token={token}")
+        print("Response:", response, response.status_code)
         if response.status_code in [201, 200]:
             print("Успешно check")
     except:
         print("Ошибка check")
 
     try:
-        response = requests.get(f"http://localhost:8000/api/user/list/?token={token}")
-        print(response, response.status_code)
-        print(response.json())
-
+        response = make_request("GET", f"user/list/?token={token}")
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
         print("УСПЕХ list")
@@ -58,9 +66,9 @@ def tests():
 
     try:
         data = {"token": token}
-        response = requests.post("http://localhost:8000/api/token/block/", data)
-        print(response, response.status_code)
-        print(response.json())
+        response = make_request("POST", "token/block/", data=data)
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
         print("TOKEN BLOCKED УСПЕХ")
@@ -68,10 +76,9 @@ def tests():
         print("НЕ УСПЕх TOKEN BLOCKED ")
 
     try:
-        response = requests.get(f"http://localhost:8000/api/user/list/?token={token}")
-        print(response, response.status_code)
-        print(response.json())
-
+        response = make_request("GET", f"user/list/?token={token}")
+        print("Response:", response, response.status_code)
+        print("Response body:", response.json())
         if response.status_code not in [201, 200]:
             raise Exception("123")
         print("УСПЕХ list")
@@ -79,4 +86,4 @@ def tests():
         print("Не УСПЕХ list")
 
 
-tests()
+run_tests()
