@@ -86,4 +86,5 @@ def run_tests():
         print("Не УСПЕХ list")
 
 
-run_tests()
+if __name__ == "__main__":
+    run_tests()
