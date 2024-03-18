@@ -6,8 +6,9 @@ from contracts import views
 urlpatterns = [
     path("", views.home, name="home"),
     path("api/contracts/", views.contracts, name="contracts"),
+    path("api/agents/", views.agents_detail, name="agents_detail"),
+    path("api/agents/<int:id>/", views.agents_detail, name="agents_detail"),
     # path("api/contract/<int:id>", views.contract, name="contract"),
-    # path("api/contragents/<int:id>", views.contragents, name="contragents"),
     # path("api/contragent/<int:id>", views.contragent, name="contragent"),
     # path("api/users/", views.users, name="users/"),
     # path("api/user/<int:id>", views.user, name="user"),
