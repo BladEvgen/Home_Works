@@ -1,5 +1,4 @@
 import TextField from "@mui/material/TextField";
-import ComboBox from "./ComboBox.tsx";
 import { Box, Button } from "@mui/material";
 import React from "react";
 import { IForm } from "../schemas/IData.ts";
@@ -10,6 +9,7 @@ interface IProps {
   form: IForm;
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   fileSize: number;
+  selectedAgentId: number | null;
 }
 
 const ContractForm: React.FC<IProps> = ({
@@ -29,7 +29,6 @@ const ContractForm: React.FC<IProps> = ({
             gap: "5px",
             width: "200px",
           }}>
-          <ComboBox />
           <Button variant="contained" component="label">
             Upload File
             <input onChange={handleFileChange} type="file" name="file" hidden />

@@ -1,10 +1,11 @@
 import TableComponent from "../components/TableComponent.tsx";
 import ContractForm from "../components/ContractForm.tsx";
+import ComboBox from "../components/ComboBox.tsx";
 import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IData, IForm } from "../schemas/IData.ts";
-import { isDebug } from "../../constants.tsx";
+import { isDebug, apiUrl } from "../../apiConfig.ts";
 
 const MainPage = () => {
   const [data, setData] = useState<IData[]>([]);
@@ -16,6 +17,7 @@ const MainPage = () => {
     file: null,
   });
   const [fileSize, setFileSize] = useState<number>(0);
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -42,8 +44,13 @@ const MainPage = () => {
   const postData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!selectedAgentId) {
+      window.alert("Please select an agent.");
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("agent_id", form.agent_id.toString());
+    formData.append("agent_id", selectedAgentId.toString());
     formData.append("comment", form.comment);
     formData.append("total", form.total.toString());
     if (form.file) {
@@ -54,15 +61,11 @@ const MainPage = () => {
     }
     console.log("form", form);
     try {
-      const res = await axios.post(
-        "http://127.0.0.1:8000/api/contracts/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const res = await axios.post(`${apiUrl}/api/contracts/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       getData();
       if (isDebug) {
         console.log(res);
@@ -76,7 +79,7 @@ const MainPage = () => {
 
   const getData = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/contracts/");
+      const res = await axios.get(`${apiUrl}/api/contracts/`);
       setData(res.data.data);
     } catch (error) {
       if (isDebug) {
@@ -111,12 +114,14 @@ const MainPage = () => {
           gap: "5px",
         }}>
         <TableComponent data={data} totalSum={totalSum} />
+        <ComboBox onAgentSelect={setSelectedAgentId} />
         <ContractForm
           postData={postData}
           handleFileChange={handleFileChange}
           form={form}
           handleInputChange={handleInputChange}
           fileSize={fileSize}
+          selectedAgentId={selectedAgentId}
         />
       </Box>
     </>
