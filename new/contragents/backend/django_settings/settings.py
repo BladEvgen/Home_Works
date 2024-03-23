@@ -20,6 +20,7 @@ DEBUG = True if socket.gethostname() == "RogStrix" else False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
 
 dotenv_path = BASE_DIR / ".env"
 if dotenv_path.exists():
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "contracts.middleware.CustomCorsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -88,16 +90,33 @@ CORS_ALLOWED_ORIGINS = [
 
 ROOT_URLCONF = "django_settings.urls"
 
+# TEMPLATES = [
+#     {
+#         "BACKEND": "django.template.backends.django.DjangoTemplates",
+#         "DIRS": [
+#             BASE_DIR / "templates",
+#         ],
+#         "APP_DIRS": True,
+#         "OPTIONS": {
+#             "context_processors": [
+#                 "django.template.context_processors.request",
+#                 "django.template.context_processors.debug",
+#                 "django.template.context_processors.request",
+#                 "django.contrib.auth.context_processors.auth",
+#                 "django.contrib.messages.context_processors.messages",
+#             ],
+#         },
+#     },
+# ]
+
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            BASE_DIR / "templates",
-        ],
+        "DIRS": [FRONTEND_DIR / "dist"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.request",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -157,7 +176,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "Asia/Almaty"
 
@@ -169,20 +188,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = Path(BASE_DIR / "staticroot")
+STATIC_URL = "assets/" if DEBUG else "/static/"
+STATIC_ROOT = Path(BASE_DIR, "staticroot")
 
 # массив с папками откуда джанго "собирает" статику
 STATICFILES_DIRS = [
-    Path(BASE_DIR, "static"),
+    Path(BASE_DIR / "static"),
+    Path(FRONTEND_DIR / "dist/assets"),
 ]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = "/media/"  # /static/media
-MEDIA_ROOT = BASE_DIR / "static/media"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = Path(BASE_DIR / "static/media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
