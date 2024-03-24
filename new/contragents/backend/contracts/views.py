@@ -1,11 +1,14 @@
+from django.contrib.auth.models import User
 from django.core.cache import caches
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from contracts import models, serializers
+from contracts import models, serializers, utils
 
 Cache = caches["default"]
 
@@ -20,19 +23,56 @@ def get_cache(
     return data
 
 
-@api_view(http_method_names=["GET"])
-def home(request) -> Response:
+@permission_classes([AllowAny])
+def home(request) -> HttpResponse:
+    return render(request, "index.html", {})
+
+
+@api_view(http_method_names=["POST"])
+@permission_classes([AllowAny])
+def user_register(request):
+    email = request.data.get("email", None)
+    password = request.data.get("password", None)
+
+    if not email or not password:
+        return Response(
+            {"error": "Требуются адрес электронной почты и пароль"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not utils.password_check(password):
+        return Response(
+            {"error": "Пароль недействителен"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    username = email.split("@")[0]
+    user, created = User.objects.get_or_create(username=username, email=email)
+
+    if not created:
+        return Response(
+            {"error": "Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user.set_password(password)
+    user.save()
+
     return Response(
-        data={"data": "Ok"},
-        status=status.HTTP_200_OK,
+        {"message": "Пользователь успешно зарегистрирован"},
+        status=status.HTTP_201_CREATED,
     )
 
 
 @api_view(["GET", "POST"])
+@permission_classes([AllowAny])
 @csrf_exempt
 def contracts(request):
     if request.method == "GET":
-        contracts = models.Contract.objects.all()
+
+        def get_contracts():
+            return models.Contract.objects.all()
+
+        contracts = get_cache(key="contracts_list", query=get_contracts, timeout=1)
+
         serializer = serializers.ContractSerializer(contracts, many=True)
         return Response({"data": serializer.data})
     elif request.method == "POST":
@@ -60,11 +100,17 @@ def contracts(request):
 
 
 @api_view(["GET", "POST"])
+@permission_classes([AllowAny])
 def agents_detail(request, id=None) -> Response:
     try:
         if request.method == "GET":
             if id is None:
-                agents = models.Contragent.objects.all()
+
+                def get_agents():
+                    return models.Contragent.objects.all()
+
+                agents = get_cache(key="agents_list", query=get_agents, timeout=10)
+
                 serialized_agents = [
                     {"id": agent.id, "bin": agent.bin, "title": agent.title}
                     for agent in agents
@@ -95,13 +141,13 @@ def agents_detail(request, id=None) -> Response:
                 )
             else:
                 return Response(
-                    {"message": "bin and title are required fields"},
+                    {"message": "bin и title обязательные поля"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
     except models.Contragent.DoesNotExist:
         return Response(
-            {"message": "Agent does not exist"}, status=status.HTTP_404_NOT_FOUND
+            {"message": "Агент не существует"}, status=status.HTTP_404_NOT_FOUND
         )
     except Exception as error:
         return Response(
