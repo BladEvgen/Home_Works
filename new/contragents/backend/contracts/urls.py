@@ -14,6 +14,7 @@ urlpatterns = [
     path("api/agents/", views.agents_detail, name="agents_detail"),
     path("api/agents/<int:id>/", views.agents_detail, name="agents_detail"),
     path("api/user/register/", views.user_register, name="register"),
+    path("api/user/details/", views.user_details, name="user_details"),
     path("api/token/", TokenObtainPairView.as_view()),
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path("api/token/verify/", TokenVerifyView.as_view()),

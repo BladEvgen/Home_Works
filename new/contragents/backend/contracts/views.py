@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from contracts import models, serializers, utils
@@ -60,6 +60,21 @@ def user_register(request):
         {"message": "Пользователь успешно зарегистрирован"},
         status=status.HTTP_201_CREATED,
     )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_details(request):
+    user = request.user
+
+    response_data = {
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
 
 
 @api_view(["GET", "POST"])
