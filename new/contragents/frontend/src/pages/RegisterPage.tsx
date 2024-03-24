@@ -53,7 +53,7 @@ const RegisterPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           name="username"
-          label="Имя пользователя"
+          label="Email"
           type="string"
           variant="standard"
           fullWidth
@@ -68,7 +68,7 @@ const RegisterPage = () => {
           fullWidth
         />
         <Button variant="contained" onClick={handleSubmit} fullWidth>
-          Отправить
+          Зарегистрироваться
         </Button>
       </Box>
     </>
