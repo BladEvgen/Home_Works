@@ -129,3 +129,4 @@ web_modules/
 .yarn/install-state.gz
 .pnp.*
 *.pdf
+/new/contragents/backend/staticroot
