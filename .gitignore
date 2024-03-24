@@ -131,3 +131,4 @@ web_modules/
 *.pdf
 /new/contragents/backend/staticroot
 /new/contragents/frontend/dist
+/new/contragents/frontend/dist/assets
