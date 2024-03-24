@@ -2,16 +2,22 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from contracts import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("api/contracts/", views.contracts, name="contracts"),
     path("api/agents/", views.agents_detail, name="agents_detail"),
     path("api/agents/<int:id>/", views.agents_detail, name="agents_detail"),
+    path("api/user/register/", views.user_register, name="register"),
+    path("api/token/", TokenObtainPairView.as_view()),
+    path("api/token/refresh/", TokenRefreshView.as_view()),
+    path("api/token/verify/", TokenVerifyView.as_view()),
     # path("api/contract/<int:id>", views.contract, name="contract"),
-    # path("api/contragent/<int:id>", views.contragent, name="contragent"),
-    # path("api/users/", views.users, name="users/"),
-    # path("api/user/<int:id>", views.user, name="user"),
     # path("api/comments/", views.comments, name="comments"),
     # path("api/comment/<int:id>", views.comment, name="comment"),
 ]
