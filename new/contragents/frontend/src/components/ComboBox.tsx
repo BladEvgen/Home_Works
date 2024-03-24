@@ -58,6 +58,7 @@ const ComboBox: React.FC<IComboBoxProps> = ({
           id="combo-box-demo"
           options={data}
           getOptionLabel={(option: IAgent) => option.title}
+          //@ts-ignore
           onChange={(event, value) => handleAgentSelect(value)}
           renderInput={(params) => (
             <TextField {...params} label="Agents" sx={{ width }} />
