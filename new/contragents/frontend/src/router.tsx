@@ -1,16 +1,37 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { ReactNode } from "react";
+import { createBrowserRouter } from "react-router-dom";
 
-import MainPage from './pages/MainPage.tsx'
-import StaffPage from './pages/StaffPage.tsx'
+import MainPage from "./pages/MainPage.tsx";
+import StaffPage from "./pages/StaffPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import HeaderComponent from "./components/HeaderComponent.tsx";
 
-const status = false
+interface LayoutProps {
+  children: ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <div>
+      <HeaderComponent />
+      {children}
+    </div>
+  );
+};
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: status ? <StaffPage/> : <MainPage/>
-  }
-])
+    path: "/",
+    element: <Layout>{status ? <StaffPage /> : <MainPage />}</Layout>,
+  },
+  {
+    path: "/register",
+    element: (
+      <Layout>
+        <RegisterPage />
+      </Layout>
+    ),
+  },
+]);
 
-
-export default router
+export default router;
