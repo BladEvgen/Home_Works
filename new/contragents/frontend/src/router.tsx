@@ -5,6 +5,7 @@ import MainPage from "./pages/MainPage.tsx";
 import StaffPage from "./pages/StaffPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import HeaderComponent from "./components/HeaderComponent.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
 
 interface LayoutProps {
   children: ReactNode;
@@ -29,6 +30,14 @@ const router = createBrowserRouter([
     element: (
       <Layout>
         <RegisterPage />
+      </Layout>
+    ),
+  },
+  {
+    path: "/login",
+    element: (
+      <Layout>
+        <LoginPage />
       </Layout>
     ),
   },
