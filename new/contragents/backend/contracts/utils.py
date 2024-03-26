@@ -23,7 +23,7 @@ def gin_log_decorator(func):
         else:
             error_message = (
                 response.data.get("message", "Unknown error")
-                if response
+                if hasattr(response, "data")
                 else "Unknown error"
             )
 
@@ -46,11 +46,9 @@ def gin_log_decorator(func):
 
         def log_to_remote():
             try:
-                print(log_data)
                 requests.post("http://localhost:8001/api/logs", json=log_data)
             except Exception as e:
                 print(f"Error logging to remote: {e}")
-                pass
 
         threading.Thread(target=log_to_remote).start()
 

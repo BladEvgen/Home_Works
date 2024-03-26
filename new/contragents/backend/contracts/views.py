@@ -24,9 +24,19 @@ def get_cache(
     return data
 
 
+@gin_log_decorator
 @permission_classes([AllowAny])
 def home(request) -> HttpResponse:
-    return render(request, "index.html", {})
+    try:
+        return render(
+            request,
+            "index.html",
+            context={},
+        )
+    except Exception as e:
+        return Response(
+            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(http_method_names=["POST"])
