@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from contracts import models, serializers, utils
+from contracts.utils import gin_log_decorator
 
 Cache = caches["default"]
 
@@ -30,19 +31,20 @@ def home(request) -> HttpResponse:
 
 @api_view(http_method_names=["POST"])
 @permission_classes([AllowAny])
+@gin_log_decorator
 def user_register(request):
     email = request.data.get("email", None)
     password = request.data.get("password", None)
 
     if not email or not password:
         return Response(
-            {"error": "Требуются адрес электронной почты и пароль"},
+            {"message": "Требуются адрес электронной почты и пароль"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     if not utils.password_check(password):
         return Response(
-            {"error": "Пароль недействителен"}, status=status.HTTP_400_BAD_REQUEST
+            {"message": "Пароль недействителен"}, status=status.HTTP_400_BAD_REQUEST
         )
 
     username = email.split("@")[0]
@@ -50,7 +52,7 @@ def user_register(request):
 
     if not created:
         return Response(
-            {"error": "Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST
+            {"message": "Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST
         )
 
     user.set_password(password)
@@ -80,6 +82,7 @@ def user_details(request):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 @csrf_exempt
+@gin_log_decorator
 def contracts(request):
     if request.method == "GET":
 
@@ -111,11 +114,12 @@ def contracts(request):
             response_data = {"data": {"id": contract.id, "status": "Created"}}
             return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
+@gin_log_decorator
 def agents_detail(request, id=None) -> Response:
     try:
         if request.method == "GET":
