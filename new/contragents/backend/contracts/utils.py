@@ -2,7 +2,7 @@ import json
 import os
 import re
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
 
 import requests
@@ -29,7 +29,7 @@ def gin_log_decorator(func):
 
         log_data = {
             "ip": request.META.get("REMOTE_ADDR"),
-            "timestamp": int(datetime.utcnow().timestamp()),
+            "timestamp": int(datetime.now().timestamp()),
             "status_code": response.status_code if response else 500,
             "method": request.method,
             "path": request.path,
@@ -46,6 +46,7 @@ def gin_log_decorator(func):
 
         def log_to_remote():
             try:
+                print(log_data)
                 requests.post("http://localhost:8001/api/logs", json=log_data)
             except Exception as e:
                 print(f"Error logging to remote: {e}")
@@ -53,7 +54,7 @@ def gin_log_decorator(func):
 
         threading.Thread(target=log_to_remote).start()
 
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = datetime.now().strftime("%H-%d-%m-%Y")
         log_path = os.path.join(settings.BASE_DIR, f"logs/log_{today}.log")
         log_list = []
 
