@@ -24,8 +24,8 @@ def get_cache(
     return data
 
 
-@gin_log_decorator
 @permission_classes([AllowAny])
+@gin_log_decorator
 def home(request) -> HttpResponse:
     try:
         return render(
@@ -90,10 +90,11 @@ def user_details(request):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
+@permission_classes([AllowAny])  # Поменять на IsAuthenticated
 @csrf_exempt
 @gin_log_decorator
 def contracts(request):
+    print("Step 1 Contracts", request.user)
     if request.method == "GET":
 
         def get_contracts():

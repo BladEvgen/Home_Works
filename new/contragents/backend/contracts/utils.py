@@ -15,6 +15,8 @@ log_lock = threading.Lock()
 def gin_log_decorator(func):
     @wraps(func)
     def wrapper(request: HttpRequest, *args, **kwargs):
+        print("Step 2 Decorator")
+        print(request.user)
         try:
             response = func(request, *args, **kwargs)
         except Exception as error:
