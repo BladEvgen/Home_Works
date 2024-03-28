@@ -7,6 +7,9 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from contracts.swagger import urlpatterns as doc_urls
+from django.contrib.auth.views import LoginView, LogoutView
+
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -18,9 +21,13 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view()),
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path("api/token/verify/", TokenVerifyView.as_view()),
+    path("accounts/login/", LoginView.as_view(), name="login"),
+    path("accounts/logout/", views.CustomLogoutView.as_view(), name="logout"),
     # path("api/contract/<int:id>", views.contract, name="contract"),
     # path("api/comments/", views.comments, name="comments"),
     # path("api/comment/<int:id>", views.comment, name="comment"),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += doc_urls
