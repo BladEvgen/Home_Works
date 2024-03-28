@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IData, IForm } from "../schemas/IData.ts";
 import { isDebug, apiUrl } from "../../apiConfig.ts";
+import Cookies from "js-cookie";
 
 const MainPage = () => {
   const [data, setData] = useState<IData[]>([]);
@@ -44,6 +45,11 @@ const MainPage = () => {
   const postData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const accessToken = Cookies.get("access_token");
+    if (!accessToken) {
+      console.error("Missing access token!");
+      return;
+    }
     if (!selectedAgentId) {
       window.alert("Please select an agent.");
       return;
@@ -64,6 +70,7 @@ const MainPage = () => {
       const res = await axios.post(`${apiUrl}/api/contracts/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       getData();
@@ -79,7 +86,13 @@ const MainPage = () => {
 
   const getData = async () => {
     try {
-      const res = await axios.get(`${apiUrl}/api/contracts/`);
+      const accessToken = Cookies.get("access_token");
+
+      const res = await axios.get(`${apiUrl}/api/contracts/`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setData(res.data.data);
     } catch (error) {
       if (isDebug) {

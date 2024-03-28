@@ -3,7 +3,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { isDebug, apiUrl } from "../../apiConfig";
-
+import Cookies from "js-cookie";
 interface IAgent {
   bin: string;
   id: number;
@@ -24,8 +24,17 @@ const ComboBox: React.FC<IComboBoxProps> = ({
 
   const getData = async () => {
     setIsLoading(true);
+    const accessToken = Cookies.get("access_token");
+    if (!accessToken) {
+      console.error("Missing access token!");
+      return;
+    }
     try {
-      const res = await axios.get(`${apiUrl}/api/agents/`);
+      const res = await axios.get(`${apiUrl}/api/agents/`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setData(res.data.data);
     } catch (error) {
       if (isDebug) {
