@@ -1,12 +1,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import {apiUrl} from "../apiConfig"
+import { apiUrl } from "../apiConfig";
+
 const axiosInstance = axios.create({
   baseURL: `${apiUrl}/api`,
   timeout: 5000,
   headers: {
     "Content-Type": "application/json;charset=utf-8",
-  },
+  }
 });
 
 axiosInstance.interceptors.request.use(
