@@ -90,11 +90,10 @@ def user_details(request):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])  # Поменять на IsAuthenticated
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 @gin_log_decorator
 def contracts(request):
-    print("Step 1 Contracts", request.user)
     if request.method == "GET":
 
         def get_contracts():
@@ -129,7 +128,7 @@ def contracts(request):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 @gin_log_decorator
 def agents_detail(request, id=None) -> Response:
     try:
