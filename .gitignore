@@ -132,3 +132,4 @@ web_modules/
 /new/contragents/backend/staticroot
 /new/contragents/frontend/dist
 /new/contragents/frontend/dist/assets
+*.exe
