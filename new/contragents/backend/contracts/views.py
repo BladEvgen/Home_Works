@@ -1,15 +1,26 @@
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.core.cache import caches
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from contracts import models, serializers, utils
 from contracts.utils import gin_log_decorator
+
+
+class CustomLogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        logout(request)
+        return redirect("/swagger/")
+
 
 Cache = caches["default"]
 
