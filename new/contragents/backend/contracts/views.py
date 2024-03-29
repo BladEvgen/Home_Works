@@ -9,7 +9,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from contracts import models, serializers, utils
 from contracts.utils import gin_log_decorator
 
@@ -50,6 +51,38 @@ def home(request) -> HttpResponse:
         )
 
 
+@swagger_auto_schema(
+    method="POST",
+    operation_summary="Allow users to register",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "email": openapi.Schema(
+                type=openapi.TYPE_STRING, description="The user's email address."
+            ),
+            "password": openapi.Schema(
+                type=openapi.TYPE_STRING, description="The user's password."
+            ),
+        },
+        required=["email", "password"],
+    ),
+    responses={
+        201: openapi.Response(
+            "User successfully registered",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "message": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="A message indicating the outcome of the registration.",
+                    ),
+                },
+            ),
+        ),
+        400: "BAD REQUEST - Invalid request data or email already in use",
+    },
+    operation_description="Registers a new user.",
+)
 @api_view(http_method_names=["POST"])
 @permission_classes([AllowAny])
 @gin_log_decorator
@@ -85,6 +118,36 @@ def user_register(request):
     )
 
 
+@swagger_auto_schema(
+    method="GET",
+    operation_summary="Return data for user",
+    responses={
+        200: openapi.Response(
+            "User details retrieved successfully",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "username": openapi.Schema(
+                        type=openapi.TYPE_STRING, description="The user's username."
+                    ),
+                    "email": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="The user's email address.",
+                    ),
+                    "first_name": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="The user's first name (optional).",
+                    ),
+                    "last_name": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="The user's last name (optional).",
+                    ),
+                },
+            ),
+        ),
+    },
+    operation_description="Retrieves details of the currently authenticated user.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def user_details(request):
@@ -100,6 +163,92 @@ def user_details(request):
     return Response(response_data, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(
+    method="GET",
+    operation_summary="Retrieves a list of contracts",
+    operation_description="Retrieves a list of contracts. Requires authentication.",
+    responses={
+        200: openapi.Response(
+            description="Contracts retrieved successfully",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "data": openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "id": openapi.Schema(
+                                    type=openapi.TYPE_INTEGER,
+                                    description="The ID of the contract.",
+                                ),
+                                "agent": openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    description="The name of the agent associated with the contract.",
+                                ),
+                                "total": openapi.Schema(
+                                    type=openapi.TYPE_NUMBER,
+                                    description="The total amount of the contract.",
+                                ),
+                            },
+                        ),
+                    ),
+                },
+            ),
+        ),
+    },
+)
+@swagger_auto_schema(
+    method="POST",
+    operation_summary="Creates a new contract",
+    operation_description="Creates a new contract. Requires authentication.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=["agent_id", "total", "file"],
+        properties={
+            "agent_id": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                description="The ID of the agent associated with the contract. (Required)",
+            ),
+            "total": openapi.Schema(
+                type=openapi.TYPE_NUMBER,
+                description="The total amount of the contract. (Required)",
+            ),
+            "comment": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="An optional comment for the contract.",
+            ),
+            "file": openapi.Schema(
+                type=openapi.TYPE_FILE,
+                description="An optional file to upload associated with the contract. (Required)",
+            ),
+        },
+    ),
+    responses={
+        201: openapi.Response(
+            description="Contract created successfully",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "data": openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "id": openapi.Schema(
+                                type=openapi.TYPE_INTEGER,
+                                description="The ID of the newly created contract.",
+                            ),
+                            "status": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="The status of the contract (always 'Created' upon creation).",
+                            ),
+                        },
+                    ),
+                },
+            ),
+        ),
+        400: "Bad request",
+    },
+)
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 @csrf_exempt
@@ -138,6 +287,64 @@ def contracts(request):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(
+    methods=["GET"],
+    operation_id="Get_List_of_Agents",
+    responses={
+        200: openapi.Response(
+            description="List of agents",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "data": openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                "bin": openapi.Schema(type=openapi.TYPE_STRING),
+                                "title": openapi.Schema(type=openapi.TYPE_STRING),
+                            },
+                        ),
+                    ),
+                },
+            ),
+        ),
+        500: "Internal Server Error",
+    },
+)
+@swagger_auto_schema(
+    methods=["POST"],
+    operation_id="Create_New_Agent",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "bin": openapi.Schema(type=openapi.TYPE_STRING),
+            "title": openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=["bin", "title"],
+    ),
+    responses={
+        201: openapi.Response(
+            description="New agent created",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "data": openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                            "bin": openapi.Schema(type=openapi.TYPE_STRING),
+                            "title": openapi.Schema(type=openapi.TYPE_STRING),
+                        },
+                    ),
+                },
+            ),
+        ),
+        400: "Bad Request",
+        500: "Internal Server Error",
+    },
+)
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 @gin_log_decorator
