@@ -1,9 +1,12 @@
 import datetime
+from typing import Any
+from django.db.models.manager import BaseManager
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 from django_app import models
+from django.db import connection
 
 
 @api_view(http_method_names=["GET"])
@@ -21,6 +24,7 @@ def home(request: Request):
                     data={"message": "End date cannot be before start date."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
         else:
             today = datetime.datetime.today()
             param_date_from = today.replace(day=1)
@@ -28,7 +32,51 @@ def home(request: Request):
                 month=param_date_from.month + 1, day=1
             )
 
-        filter_date = models.Sale.objects.filter(
+        cursor = connection.cursor()
+
+        query = """
+            CREATE EXTENSION IF NOT EXISTS tablefunc;
+
+            SELECT 
+                month, 
+                shop_name, 
+                COALESCE(сладости, 0) AS сладости, 
+                COALESCE(другое, 0) AS другое, 
+                COALESCE(хлеб, 0) AS хлеб
+            FROM crosstab(
+                $$
+                SELECT 
+                    TO_CHAR(s.date, 'YYYY-MM') AS month, 
+                    sh.name AS shop_name,  
+                    p.category AS category_name,  
+                    SUM(s.quantity * s.price) AS total_sales
+                FROM 
+                    django_app_sale s
+                JOIN 
+                    django_app_product p ON p.id = s.product_id
+                JOIN 
+                    django_app_shop sh ON sh.id = s.shop_id
+                WHERE 
+                    s.date BETWEEN %s AND %s
+                GROUP BY 
+                    1, 2, 3
+                ORDER BY 
+                    1, 2, 3
+                $$,
+                $$
+                SELECT DISTINCT p.category FROM django_app_product p ORDER BY 1
+                $$
+            ) AS ct (month text, shop_name text, сладости numeric, другое numeric, хлеб numeric)
+            ORDER BY month, shop_name;
+        """
+
+        cursor.execute(
+            query,
+            (param_date_from.strftime("%Y-%m-%d"), param_date_to.strftime("%Y-%m-%d")),
+        )
+        data_q: list[tuple[Any, ...]] = cursor.fetchall()
+
+        filter_date: BaseManager[models.Sale] = models.Sale.objects.filter(
             date__gte=param_date_from, date__lte=param_date_to
         )
 
@@ -66,7 +114,9 @@ def home(request: Request):
 
         data_2 = sorted(data_2, key=lambda x: (x[0], x[1]))
 
-        return Response(data={"message": data_2}, status=status.HTTP_200_OK)
+        return Response(
+            data={"message": data_2, "message_2:": data_q}, status=status.HTTP_200_OK
+        )
 
     except (ValueError, TypeError) as e:
         return Response(
