@@ -1,6 +1,4 @@
 import datetime
-from typing import Any
-from django.db.models.manager import BaseManager
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -74,9 +72,9 @@ def home(request: Request):
             query,
             (param_date_from.strftime("%Y-%m-%d"), param_date_to.strftime("%Y-%m-%d")),
         )
-        data_q: list[tuple[Any, ...]] = cursor.fetchall()
+        data_q = cursor.fetchall()
 
-        filter_date: BaseManager[models.Sale] = models.Sale.objects.filter(
+        filter_date = models.Sale.objects.filter(
             date__gte=param_date_from, date__lte=param_date_to
         )
 
