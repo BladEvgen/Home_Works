@@ -133,3 +133,5 @@ web_modules/
 /new/contragents/frontend/dist
 /new/contragents/frontend/dist/assets
 *.exe
+/new/Phone_app/backend/static
+new/Phone_app/frontend/README.md
