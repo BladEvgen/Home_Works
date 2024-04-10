@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -14,6 +15,77 @@ def home(request: Request) -> Response:
     return Response({"message": "OK"}, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(
+    method="GET",
+    operation_summary="Получить предупреждения для пользователя",
+    manual_parameters=[
+        openapi.Parameter(
+            name="user_id",
+            in_=openapi.IN_QUERY,
+            required=False,
+            type=openapi.TYPE_INTEGER,
+            description="ID пользователя, для которого требуется получить предупреждения.",
+        ),
+    ],
+    responses={
+        200: openapi.Response(
+            "Предупреждения успешно получены",
+            openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "tabel_id": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Табельный номер пользователя.",
+                        ),
+                        "person_full_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Полное имя человека.",
+                        ),
+                        "clothes_category": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Категория одежды.",
+                        ),
+                        "clothes_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Наименование одежды.",
+                        ),
+                        "remaining_days": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Оставшиеся дни.",
+                        ),
+                    },
+                ),
+            ),
+        ),
+        404: openapi.Response(
+            "Пользователь не найден",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Сообщение об ошибке, указывающее на то, что пользователь не найден.",
+                    )
+                },
+            ),
+        ),
+        500: openapi.Response(
+            "Внутренняя ошибка сервера",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Сообщение об ошибке сервера.",
+                    )
+                },
+            ),
+        ),
+    },
+    operation_description="Получает предупреждения для пользователя. Если указан `user_id`, то получаются предупреждения именно для этого пользователя; в противном случае получаются предупреждения для всех пользователей.",
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def warning_messages(request):
