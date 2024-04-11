@@ -5,9 +5,9 @@ from django.urls import path
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Contracts API",
+        title="API to control Utility Clothes",
         default_version="v1",
-        description="API для управления контрактами",
+        description="API для управления системой спец.одежды",
         license=openapi.License(name="MIT License"),
     ),
     public=True,
