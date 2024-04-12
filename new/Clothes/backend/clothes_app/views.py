@@ -514,3 +514,129 @@ def update_clothe(request):
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR, data={"message": str(e)}
         )
+
+
+@swagger_auto_schema(
+    method="GET",
+    operation_summary="Получить список просроченных предметов, с должниками",
+    manual_parameters=[
+        openapi.Parameter(
+            name="tabel_num",
+            in_=openapi.IN_QUERY,
+            required=False,
+            type=openapi.TYPE_STRING,
+            description="Табельный номер пользователя.",
+        ),
+    ],
+    responses={
+        200: openapi.Response(
+            "Предупреждения успешно получены",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "clothes_name": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Наименование одежды.",
+                    ),
+                    "category_name": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Категория одежды.",
+                    ),
+                    "user_full_name": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Полное имя пользователя.",
+                    ),
+                    "user_tabel_num": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Табельный номер пользователя.",
+                    ),
+                    "date_ended_wearing": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Дата окончания ношения.",
+                    ),
+                },
+            ),
+        ),
+        404: openapi.Response(
+            "Одежда не найдена",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Сообщение об ошибке, указывающее на то, что Использованная одежда не найдена.",
+                    )
+                },
+            ),
+        ),
+        500: openapi.Response(
+            "Внутренняя ошибка сервера",
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Сообщение об ошибке сервера.",
+                    )
+                },
+            ),
+        ),
+    },
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_worn_clothes(request):
+    tabel_num = request.GET.get("tabel_num", None)
+
+    try:
+        query = "SELECT * FROM get_currently_worn_clothes()"
+        params = ()
+        many = True
+
+        if tabel_num is not None:
+            query += " WHERE user_tabel_num = %s"
+            params = [tabel_num]
+            many = False
+
+        result = utils.execute_query(
+            query,
+            params=params,
+            fetch=True,
+            many=many,
+        )
+
+        if result == -1:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data={"error": "Failed to get data from the database"},
+            )
+
+        formatted_result = []
+        if many:
+            for item in result:
+                formatted_item = {
+                    "clothes_name": item[0],
+                    "category_name": item[1],
+                    "user_full_name": f"{item[2]} {item[3]}",
+                    "user_tabel_num": item[4],
+                    "date_ended_wearing": item[6].strftime("%Y-%m-%d"),
+                }
+                formatted_result.append(formatted_item)
+        else:
+            formatted_item = {
+                "clothes_name": result[0],
+                "category_name": result[1],
+                "user_full_name": f"{result[2]} {result[3]}",
+                "user_tabel_num": result[4],
+                "date_ended_wearing": result[6].strftime("%Y-%m-%d"),
+            }
+            formatted_result.append(formatted_item)
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data=formatted_result,
+        )
+    except Exception as e:
+        return Response(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR, data={"error": str(e)}
+        )

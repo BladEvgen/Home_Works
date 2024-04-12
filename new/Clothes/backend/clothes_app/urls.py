@@ -11,6 +11,7 @@ urlpatterns = [
     path("api/delete_clothes", views.delete_clothes),
     path("api/add_clothe", views.insert_new_clothe),
     path("api/update_clothe", views.update_clothe),
+    path("api/worn_cloth_info", views.get_worn_clothes),
 ]
 
 if settings.DEBUG:
