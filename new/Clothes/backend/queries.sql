@@ -128,3 +128,140 @@ SELECT
     *
 FROM
     get_cloth_info (2);
+
+
+
+-- TRIGGER DB
+CREATE TABLE
+    clothesuser_logs (
+        id SERIAL PRIMARY KEY,
+        action TEXT NOT NULL,
+        field_changed TEXT,
+        timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );
+
+GRANT USAGE,
+SELECT
+    ON SEQUENCE clothesuser_logs_id_seq TO admin;
+
+
+-- TRIGGER 
+DECLARE
+    operation_text TEXT;
+    changed_fields TEXT := '';
+    column_record RECORD;
+    old_value TEXT;
+    new_value TEXT;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        operation_text := 'INSERT';
+        
+        FOR column_record IN
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = TG_TABLE_NAME AND column_name <> 'id'
+        LOOP
+            EXECUTE 'SELECT ($1).' || column_record.column_name INTO new_value USING NEW;
+            changed_fields := changed_fields || column_record.column_name || ': ' || new_value || ', ';
+        END LOOP;
+    ELSIF TG_OP = 'UPDATE' THEN
+        operation_text := 'UPDATE';
+        
+        FOR column_record IN
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = TG_TABLE_NAME AND column_name <> 'id'
+        LOOP
+            EXECUTE 'SELECT ($1).' || column_record.column_name INTO new_value USING NEW;
+            EXECUTE 'SELECT ($1).' || column_record.column_name INTO old_value USING OLD;
+            IF new_value <> old_value THEN
+                changed_fields := changed_fields || column_record.column_name || ': ' || old_value || ' -> ' || new_value || ', ';
+            END IF;
+        END LOOP;
+    ELSIF TG_OP = 'DELETE' THEN
+        operation_text := 'DELETE';
+        
+        FOR column_record IN
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = TG_TABLE_NAME AND column_name <> 'id'
+        LOOP
+            EXECUTE 'SELECT ($1).' || column_record.column_name INTO old_value USING OLD;
+            changed_fields := changed_fields || column_record.column_name || ': ' || old_value || ', ';
+        END LOOP;
+    END IF;
+
+    IF LENGTH(changed_fields) > 0 THEN
+        changed_fields := LEFT(changed_fields, LENGTH(changed_fields) - 2);
+    END IF;
+
+    INSERT INTO clothesuser_logs (action, field_changed, timestamp)
+    VALUES (operation_text, changed_fields, NOW());
+
+    RETURN NEW;
+END;
+
+
+
+-- Функция которя возвращает только у кого date_ended меньше текущей даты, UNION ALL
+
+CREATE OR REPLACE FUNCTION get_currently_worn_clothes()
+RETURNS TABLE (
+    clothes_name character varying,
+    category_name character varying,
+    user_first_name character varying,
+    user_last_name character varying,
+    user_tabel_num character varying,
+    date_started_wearing date,
+    date_ended_wearing date
+)
+AS $$
+BEGIN
+    RETURN QUERY
+    (
+        SELECT
+            c.name AS clothes_name,
+            cat.name AS category_name,
+            p.first_name AS user_first_name,
+            p.last_name AS user_last_name,
+            p.tabel_num AS user_tabel_num,
+            cu.date_started_wearing,
+            cu.date_ended_wearing
+        FROM
+            clothes_app_clothesuser cu
+        JOIN
+            clothes_app_clothes c ON cu.clothes_id = c.id
+        JOIN
+            clothes_app_category cat ON c.category_id = cat.id
+        JOIN
+            clothes_app_person p ON cu.person_id = p.id
+        WHERE
+            cu.date_started_wearing <= CURRENT_DATE
+            AND (cu.date_ended_wearing IS NULL OR cu.date_ended_wearing = CURRENT_DATE)
+
+        UNION ALL
+
+        SELECT
+            c.name AS clothes_name,
+            cat.name AS category_name,
+            p.first_name AS user_first_name,
+            p.last_name AS user_last_name,
+            p.tabel_num AS user_tabel_num,
+            cu.date_started_wearing,
+            cu.date_ended_wearing
+        FROM
+            clothes_app_clothesuser cu
+        JOIN
+            clothes_app_clothes c ON cu.clothes_id = c.id
+        JOIN
+            clothes_app_category cat ON c.category_id = cat.id
+        JOIN
+            clothes_app_person p ON cu.person_id = p.id
+        WHERE
+            cu.date_ended_wearing <= CURRENT_DATE
+    );
+END;
+$$ LANGUAGE plpgsql;
+
+-- Использование 
+SELECT * FROM get_currently_worn_clothes();
