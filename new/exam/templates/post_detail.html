@@ -1,0 +1,147 @@
+{% extends "components/base.html" %} {% load django_app_filters_and_tags %} 
+{%load static %} {% block title %}Posts Detail{% endblock title %} {% block main%}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">
+    {{ post.title }} 
+  </h2>
+  <div class="text-center m-3">
+    <img
+      src="{% post_image_url post %}"
+      alt="{{ post.title }}"
+      class="img-fluid"
+      style="max-width: 450; max-height: 450px" />
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Описание</h5>
+      <p class="card-text">{{ post.content }}</p>
+    </div>
+  </div>
+  {% if user.is_authenticated %}
+
+  <div class="mt-4">
+    {% if is_my_rating == 1 %}
+    <a href="{% url 'raiting' post.id '1' %}"
+      ><i class="row fa-solid fa-thumbs-up text-success display-6 m-1 p-3"></i
+    ></a>
+    {% else %}
+    <a href="{% url 'raiting' post.id '1' %}"
+      ><i class="row fa-regular fa-thumbs-up text-success display-6 m-1 p-3"></i
+    ></a>
+    {% endif %} {%if total_rating_value < 0 %}
+    <div class="row display-6 text-danger m-1 p-1">
+      Рейтинг поста: {{ total_rating_value }}
+    </div>
+    {%else%}
+    <div class="row display-6 text-success m-1 p-1">
+      Рейтинг поста: {{ total_rating_value }}
+    </div>
+    {%endif%} {% if is_my_rating == -1 %}
+    <a href="{% url 'raiting' post.id '-1' %}"
+      ><i class="row fa-solid fa-thumbs-down display-6 text-danger m-1 p-3"></i
+    ></a>
+    {% else %}
+    <a href="{% url 'raiting' post.id '-1' %}"
+      ><i
+        class="row fa-regular fa-thumbs-down display-6 text-danger m-1 p-3"></i
+    ></a>
+    {% endif %}
+    <h4>Написать комменатрий</h4>
+    <form method="post" action="{% url 'add_comment' post.id %}">
+      {% csrf_token %}
+      <textarea
+        name="content"
+        class="form-control mb-2"
+        placeholder="оставьте ваш отзыв здесь"
+        required></textarea>
+      <button type="submit" class="btn btn-primary">Подтвердить</button>
+    </form>
+    <div class="display-6 text-danger m-1 p-1">
+      {{ total_rating_value.dislikes }}
+    </div>
+  </div>
+  {% else %} {%if total_rating_value < 0 %}
+  <div class="row display-6 text-danger m-1 p-1">
+    Рейтинг поста: {{ total_rating_value }}
+  </div>
+  {%else%}
+  <div class="row display-6 text-success m-1 p-1">
+    Рейтинг поста: {{ total_rating_value }}
+  </div>
+  {%endif%}
+  <p class="mt-4">
+    <a href="{% url 'login' %}" class="styled-link">Войдите</a> чтобы оставить
+    отзыв
+  </p>
+  {% endif %}
+  <div class="mt-4">
+    <h4>Комментарии</h4>
+    {% for review in reviews %}
+    <div class="d-flex review-container flex-row-reverse">
+      <div class="review-buttons d-flex justify-content-end mt-2">
+        {% if user.is_authenticated and user == review.author %}
+        <form method="post" action="{% url 'delete_review' post.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="review_id" value="{{ review.id }}" />
+          <input type="hidden" name="post_id" value="{{ post.id }}" />
+          <button
+            class="btn btn-outline-none text-danger"
+            style="cursor: pointer; font-size: 1.5em"
+            onclick="return confirm('Are you sure you want to delete this comment?')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="review-container">
+      <div class="media mb-3 comment-content">
+        <img src="{% if review.author.profile.avatar %}{{ review.author.profile.get_avatar_url }}
+                {% else %}{% static 'media/png/user.png' %}
+                {% endif %}" class="mr-3 rounded-circle" alt="User Avatar" width="50">
+        <div class="media-body">
+        <h5 class="mt-0">{{ review.author.username }}</h5
+
+        {% if review.content|length > 200 %}
+            <p class="d-flex justify-content-center custom-justified">{{ review.content }}</p>
+        {% else %}
+            <p>{{ review.content }}</p>
+        {% endif %}
+        <p class="text-muted">{% relative_time review.created_at %}</p>
+        </div>
+      </div>
+    </div>
+
+    {% if user.is_authenticated and user.is_staff %}
+    <div class="review-buttons">
+      <form method="post" action="{% url 'post_detail' post.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="review_id" value="{{ review.id }}" />
+        {% if review.is_visible %}
+        <input type="hidden" name="action" value="hide" />
+        <a
+          href="#"
+          class="styled-link"
+          onclick="this.closest('form').submit(); return false;"
+          >Скрыть</a
+        >
+        {% else %}
+        <input type="hidden" name="action" value="unhide" />
+        <a
+          href="#"
+          class="styled-link"
+          onclick="this.closest('form').submit(); return false;"
+          >Показать</a
+        >
+        {% endif %}
+      </form>
+    </div>
+    {% endif %} 
+    {% endfor %}
+  </div>
+</div>
+
+{% include "components/paginator.html" %}
+<script src="{% static 'js/edit_profile_button.js' %}"></script>
+
+{% endblock main %}

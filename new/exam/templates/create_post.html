@@ -1,0 +1,56 @@
+{% extends "components/base.html" %}
+
+{% block title %} Create Post {% endblock title %}
+
+{% block main %}
+<div class="container">
+  <h2 class="text-center mb-4">Create Post</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="name">Title:</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+
+
+    <div class="form-group">
+      <label for="picture" class="btn btn-primary btn-block mt-3 mb-2">
+        Choose file
+        <input type="file" id="picture" name="picture" accept=".jpg, .jpeg, .png, .webp" style="display: none;"
+          onchange="previewImage(this);">
+      </label>
+      <img id="imagePreview" class="mt-2 img-thumbnail" style="max-width: 200px; max-height: 200px; display: none;" />
+    </div>
+
+
+    <div class="form-group">
+      <label for="content">Description:</label>
+      <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+    </div>
+
+    <br>
+    <button type="submit" class="btn btn-primary btn-block">Create Post</button>
+  </form>
+</div>
+
+<script>
+  function previewImage(input) {
+    var preview = document.getElementById('imagePreview');
+    var file = input.files[0];
+    var reader = new FileReader();
+
+    reader.onloadend = function () {
+      preview.src = reader.result;
+      preview.style.display = 'block';
+    }
+
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      preview.src = "";
+      preview.style.display = 'none';
+    }
+  }
+</script>
+
+{% endblock main %}
