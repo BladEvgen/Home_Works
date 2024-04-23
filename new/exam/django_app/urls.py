@@ -1,5 +1,10 @@
 from django.urls import path
 from django_app import views
+from rest_framework_simplejwt.views import (
+    TokenVerifyView,
+    TokenRefreshView,
+    TokenObtainPairView,
+)
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -15,4 +20,16 @@ urlpatterns = [
     path("add_comment/<int:post_id>/", views.add_comment, name="add_comment"),
     path("delete_review/<int:post_id>/", views.delete_review, name="delete_review"),
     path("create_post/", views.create_post, name="create_post"),
+    path("modify_post/<int:post_id>/", views.modify_post, name="modify_post"),
+    # * Users API
+    path("api/users/", views.UserListCreateAPIView.as_view(), name="user-list-create"),
+    path(
+        "api/users/<int:pk>/",
+        views.UserRetrieveUpdateDestroyAPIView.as_view(),
+        name="user-detail",
+    ),
+    #! Tokens
+    path("api/token/", TokenObtainPairView.as_view()),
+    path("api/token/refresh/", TokenRefreshView.as_view()),
+    path("api/token/verify/", TokenVerifyView.as_view()),
 ]
