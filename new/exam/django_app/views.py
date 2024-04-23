@@ -5,13 +5,16 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView, View
+from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 
-from django_app import models, utils
+from rest_framework import generics
+from django_app import models, serializers, utils
+from rest_framework.pagination import PageNumberPagination
 
 
 class AboutView(TemplateView):
@@ -80,7 +83,7 @@ def change_data(request, username):
 
 
 def home(request):
-    twelve_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=12)
+    twelve_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=16)
     posts = models.Post.objects.filter(created_at__gte=twelve_hours_ago)
     context = {"posts": posts}
     return render(request, "home.html", context=context)
@@ -116,7 +119,7 @@ def register(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("home", username=username)
+            return redirect("home")
         else:
             return render(
                 request,
@@ -277,6 +280,41 @@ def delete_review(request, post_id):
     return HttpResponseForbidden("You don't have permission to perform this action.")
 
 
+@login_required
+def modify_post(request, post_id):
+    post = get_object_or_404(models.Post, id=post_id)
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+
+        is_active = True if request.POST.get("is_active", None) else False
+        content = request.POST.get("content")
+        post.title = title
+        post.is_active = is_active
+        post.content = content
+
+        new_picture = request.FILES.get("picture")
+        if new_picture:
+            if post.picture.name and post.picture.name != "nodatafound.png":
+                default_storage.delete(post.picture.name)
+
+            picture_extension = new_picture.name.split(".")[-1]
+            new_picture_name = f"{post.title.replace(' ', '_')}.{picture_extension}"
+            post.picture.save(new_picture_name, new_picture)
+
+        post.save()
+
+        return redirect(reverse("post_detail", args=[post.id]))
+
+    return render(
+        request,
+        "modify_post.html",
+        {
+            "post": post,
+        },
+    )
+
+
 def raiting(request, post_id: str, is_like: str):
     author = request.user
 
@@ -296,3 +334,14 @@ def raiting(request, post_id: str, is_like: str):
         models.PostRaiting.objects.create(author=author, post=_item, is_like=_is_like)
 
     return redirect(reverse("post_detail", args=(post_id,)))
+
+
+class UserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = models.UserProfile.objects.all()
+    serializer_class = serializers.UserProfileListSerializer
+    pagination_class = PageNumberPagination
+
+
+class UserRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.UserProfile.objects.all()
+    serializer_class = serializers.UserProfileDetailSerializer
