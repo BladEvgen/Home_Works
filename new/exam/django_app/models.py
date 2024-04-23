@@ -3,8 +3,8 @@
 from django.db import models
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 from django.core.validators import FileExtensionValidator
+from django.db.models.signals import post_save, post_delete
 
 
 def user_avatar_path(instance, filename):
@@ -20,7 +20,9 @@ class UserProfile(models.Model):
         verbose_name="Пользователь",
     )
     is_banned = models.BooleanField(default=False, verbose_name="Статус Бана")
-    phonenumber = models.CharField(max_length=20, verbose_name="Номер телефона")
+    phonenumber = models.CharField(
+        max_length=20, verbose_name="Номер телефона", blank=True
+    )
     avatar = models.ImageField(
         upload_to=user_avatar_path, null=True, blank=True, verbose_name="Аватар"
     )
@@ -31,10 +33,30 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} Profile"
 
+    class Meta:
+        ordering = ("user__username", "-is_banned")
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     UserProfile.objects.get_or_create(user=instance)
+
+
+@receiver(post_save, sender=UserProfile)
+def update_user_active_status(sender, instance, **kwargs):
+    if instance.is_banned:
+        instance.user.is_active = False
+    else:
+        instance.user.is_active = True
+    instance.user.save()
+
+
+@receiver(post_delete, sender=UserProfile)
+def delete_user_on_profile_delete(sender, instance, **kwargs):
+    user = instance.user
+    user.delete()
 
 
 def post_image_path(instance, filename):
@@ -59,12 +81,18 @@ class Post(models.Model):
             FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "webp"])
         ],
     )
+    is_active = models.BooleanField(default=True, verbose_name="Активность")
 
     def get_post_url(self) -> str | None:
         return self.picture.url if self.picture else None
 
     def __str__(self) -> str:
         return f"{self.title } - {self.author}"
+
+    class Meta:
+        ordering = ("-title", "-author", "-created_at", "is_active")
+        verbose_name = "Пост"
+        verbose_name_plural = "Посты"
 
 
 class Comment(models.Model):
@@ -76,6 +104,11 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return f"{self.author} - {self.post.title}"
+
+    class Meta:
+        ordering = ("-post", "-author", "-created_at", "is_visible")
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
 
 
 class PostRaiting(models.Model):
