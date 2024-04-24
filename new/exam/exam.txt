@@ -1,0 +1,16 @@
+
+Token 
+id(unique ai), access(unique idx), refresh (unique idx), create_at(datetimefield, idx), user_id
+
+Expired token 
+id(unique ai), access(unique idx), refresh (unique idx), create_at(datetimefield, idx), user_id
+
+
+Rebuild index in night time SCHEDULLER 
+
+
+30 000 * 3 * 12 * 90  = 120 400 000 Шардирование по месяцам 
+
+
+
+user->backend->vmware (Fastapi 20% ->url-> Pydantic->Create Token (uniq for user + time +salt ...) -> insert DB (async) 70% -> Pydantic ->backend -> OK 10%) 

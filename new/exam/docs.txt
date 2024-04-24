@@ -87,6 +87,41 @@ path("grappelli/", include("grappelli.urls")), выше чем стандарт�
 2) Выполните подключение библотеки JWT для Django и её настроек, включая маршруты. Покажите в админке, как Вы получаете и используете токен. 
 
 
+В чём разница между select_related и prefetc_related? Покажите синонемичный код на SQL.
+
+select_related Он выполняет JOIN на уровне SQL, чтобы загрузить связанные объекты вместе с основным объектом.
+
+prefetch_related выполняет отдельные запросы к базе данных для каждого типа связанных объектов и затем объединяет результаты в памяти Python.
+
+
+пример на моих моделях Post Comment PostRaiting
+
+select_related
+    SELECT * 
+    FROM post
+    JOIN comment ON post.id = comment.post_id
+    JOIN post_raiting ON post.id = post_raiting.post_id
+    JOIN "user" ON post.author_id = "user".id
+    JOIN "user" AS user_1 ON comment.author_id = user_1.id
+    JOIN "user" AS user_2 ON post_raiting.author_id = user_2.id
+
+posts = Post.objects.select_related('author').select_related('comment__author').select_related('postraiting__author').all()
+
+prefetch_related
+    SELECT * FROM post;
+    SELECT * FROM comment WHERE post_id IN (...);
+    SELECT * FROM post_raiting WHERE post_id IN (...);
+    SELECT * FROM "user" WHERE id IN (...);
+posts = Post.objects.prefetch_related('comment_set', 'postraiting_set', 'author').all()
+
+
+??? использовнаие обоих с примером
+
+
+
+
+
+
 
 Комплексное задание: ++++
 В качестве практической части экзамена выполните реализацию проекта, техническое задание которого описано ниже: 
@@ -103,3 +138,4 @@ path("grappelli/", include("grappelli.urls")), выше чем стандарт�
  
 Запрещено:  
 • Брать код преподавателя с «репозиториев» или полностью копировать чужие проекты.
+
